@@ -1,0 +1,17 @@
+# Build output
+dist/
+_site/
+
+# TypeScript / Elm
+node_modules/
+elm-stuff/
+
+# Rust
+target/
+
+# Go / C / Rust wasm artifacts built in place
+*.wasm
+wasm_exec.js
+
+# Python
+__pycache__/

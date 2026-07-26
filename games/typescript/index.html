@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#1a1a2e" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Snakey" />
+    <title>Snakey</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: #1a1a2e;
+        overflow: hidden;
+        touch-action: none;
+        overscroll-behavior: none;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+      }
+      canvas {
+        touch-action: none;
+        display: block;
+      }
+      /* Bottom centre: the game's own HUD owns both top corners, and the
+         touch D-pad sits at the bottom edges. */
+      .hub-link {
+        position: fixed;
+        bottom: max(6px, env(safe-area-inset-bottom));
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        opacity: 0.75;
+        padding: 5px 12px;
+        border-radius: 999px;
+        background: rgba(22, 33, 62, 0.75);
+        border: 1px solid #2d3436;
+        color: #a0a0c0;
+        font: 600 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+        letter-spacing: 0.06em;
+        text-decoration: none;
+      }
+      .hub-link:hover {
+        opacity: 1;
+        color: #00cec9;
+        border-color: #00cec9;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="hub-link" href="../">&larr; ALL SNAKES</a>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

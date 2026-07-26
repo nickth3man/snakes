@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#1a1a2e" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="The same Snake game, written six times in six programming languages, all playable in the browser."
+    />
+    <title>Snakes &middot; one game, six languages</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        min-height: 100dvh;
+        background: #1a1a2e;
+        color: #e8e8f0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        line-height: 1.6;
+        padding: 40px 20px 56px;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .wrap {
+        width: min(100%, 960px);
+        margin: 0 auto;
+      }
+      .banner {
+        position: relative;
+        border: 1px solid #2d3436;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #16213e;
+        padding: 36px 28px;
+      }
+      .banner canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.7;
+      }
+      .banner-text {
+        position: relative;
+      }
+      h1 {
+        font-size: clamp(30px, 7vw, 52px);
+        letter-spacing: 0.14em;
+        line-height: 1.1;
+      }
+      h1 span {
+        color: #00cec9;
+      }
+      .tagline {
+        margin-top: 10px;
+        max-width: 46ch;
+        color: #a0a0c0;
+        font-size: 14px;
+        text-shadow: 0 1px 6px #16213e;
+      }
+      h2 {
+        margin: 40px 0 14px;
+        font-size: 12px;
+        letter-spacing: 0.22em;
+        color: #6b6b8a;
+        font-weight: 600;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
+        gap: 14px;
+      }
+      .card {
+        --accent: #00cec9;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 18px 18px 16px;
+        border: 1px solid #2d3436;
+        border-radius: 14px;
+        background: #16213e;
+        text-decoration: none;
+        color: inherit;
+        overflow: hidden;
+        transition: transform 0.15s ease, border-color 0.15s ease;
+      }
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 3px;
+        background: var(--accent);
+      }
+      .card:hover,
+      .card:focus-visible {
+        transform: translateY(-3px);
+        border-color: var(--accent);
+        outline: none;
+      }
+      .card h3 {
+        font-size: 17px;
+        letter-spacing: 0.06em;
+        color: var(--accent);
+      }
+      .card p {
+        font-size: 13px;
+        color: #a0a0c0;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 4px;
+      }
+      .chip {
+        font-size: 10.5px;
+        letter-spacing: 0.06em;
+        color: #8a8aa8;
+        border: 1px solid #2d3436;
+        border-radius: 999px;
+        padding: 2px 8px;
+      }
+      .play {
+        margin-top: 6px;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        color: var(--accent);
+      }
+      .note {
+        margin-top: 28px;
+        font-size: 12.5px;
+        color: #6b6b8a;
+        max-width: 70ch;
+      }
+      .note a,
+      footer a {
+        color: #a0a0c0;
+      }
+      .note a:hover,
+      footer a:hover {
+        color: #00cec9;
+      }
+      footer {
+        margin-top: 28px;
+        padding-top: 16px;
+        border-top: 1px solid #2d3436;
+        font-size: 12px;
+        color: #6b6b8a;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .card {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="banner">
+        <canvas id="demo" aria-hidden="true"></canvas>
+        <div class="banner-text">
+          <h1>SNAKES<span>_</span></h1>
+          <p class="tagline">
+            One game, six languages. Identical rules and palette every time &mdash; what changes is
+            how the board gets from source code to your screen.
+          </p>
+        </div>
+      </div>
+
+      <h2>PICK A RUNTIME</h2>
+      <div class="grid">
+        <a class="card" href="typescript/" style="--accent: #4fa3ff">
+          <h3>TypeScript</h3>
+          <p>Phaser 3 scenes, a tested game engine module, touch controls and a leaderboard.</p>
+          <div class="chips">
+            <span class="chip">PHASER 3</span>
+            <span class="chip">VITE</span>
+            <span class="chip">VITEST</span>
+          </div>
+          <span class="play">PLAY &rarr;</span>
+        </a>
+
+        <a class="card" href="rust/" style="--accent: #ff7675">
+          <h3>Rust</h3>
+          <p>
+            <code>no_std</code>, no wasm-bindgen. A ~3&nbsp;KB module keeps the board in linear
+            memory; JavaScript reads it and paints.
+          </p>
+          <div class="chips">
+            <span class="chip">WASM32-UNKNOWN-UNKNOWN</span>
+            <span class="chip">NO_STD</span>
+          </div>
+          <span class="play">PLAY &rarr;</span>
+        </a>
+
+        <a class="card" href="go/" style="--accent: #00cec9">
+          <h3>Go</h3>
+          <p>
+            Go owns the whole frame: <code>syscall/js</code> reads the keyboard, drives
+            requestAnimationFrame and draws to the canvas.
+          </p>
+          <div class="chips">
+            <span class="chip">GOOS=JS GOARCH=WASM</span>
+            <span class="chip">SYSCALL/JS</span>
+          </div>
+          <span class="play">PLAY &rarr;</span>
+        </a>
+
+        <a class="card" href="c/" style="--accent: #74b9ff">
+          <h3>C</h3>
+          <p>
+            Freestanding <code>clang --target=wasm32</code>: no libc, no emscripten, no runtime.
+            Just static arrays and exported functions.
+          </p>
+          <div class="chips">
+            <span class="chip">CLANG</span>
+            <span class="chip">NOSTDLIB</span>
+            <span class="chip">WASM-LD</span>
+          </div>
+          <span class="play">PLAY &rarr;</span>
+        </a>
+
+        <a class="card" href="python/" style="--accent: #ffd479">
+          <h3>Python</h3>
+          <p>
+            Real CPython, compiled to WebAssembly by Pyodide. Dataclasses and
+            <code>random.choice</code> calling into the DOM.
+          </p>
+          <div class="chips">
+            <span class="chip">PYODIDE</span>
+            <span class="chip">CPYTHON</span>
+          </div>
+          <span class="play">PLAY &rarr;</span>
+        </a>
+
+        <a class="card" href="elm/" style="--accent: #8cd636">
+          <h3>Elm</h3>
+          <p>
+            No canvas and no draw loop. The board is a value, the view is a pure function of it,
+            and the result is SVG.
+          </p>
+          <div class="chips">
+            <span class="chip">ELM 0.19.2</span>
+            <span class="chip">SVG</span>
+            <span class="chip">PORTS</span>
+          </div>
+          <span class="play">PLAY &rarr;</span>
+        </a>
+      </div>
+
+      <p class="note">
+        Same rules everywhere: a 24&times;24 board, walls are fatal, the tail is not, ten points an
+        apple and the clock speeds up as you grow. Every version is built from source by GitHub
+        Actions and deployed together.
+      </p>
+
+      <footer>
+        <span>MIT licensed</span>
+        <a href="https://github.com/nickth3man/snakes">source on github</a>
+      </footer>
+    </div>
+
+    <script type="module">
+      // A snake plays itself behind the title: greedy chase, flood-fill safety
+      // check, restart on death. Same rules as the games, tiny board.
+      const canvas = document.getElementById("demo");
+      const ctx = canvas.getContext("2d");
+      const CELL = 18;
+      let cols = 0, rows = 0, snake = [], food = null, acc = 0, last = 0;
+
+      const key = (p) => p.x + "," + p.y;
+      const inside = (p) => p.x >= 0 && p.y >= 0 && p.x < cols && p.y < rows;
+      const DIRS = [
+        { x: 1, y: 0 },
+        { x: -1, y: 0 },
+        { x: 0, y: 1 },
+        { x: 0, y: -1 },
+      ];
+
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.min(devicePixelRatio || 1, 2);
+        canvas.width = Math.round(rect.width * dpr);
+        canvas.height = Math.round(rect.height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        cols = Math.max(8, Math.floor(rect.width / CELL));
+        rows = Math.max(4, Math.floor(rect.height / CELL));
+        reset();
+      }
+
+      function reset() {
+        // Start on the right, clear of the title text.
+        const y = Math.floor(rows / 2);
+        const x = cols - 3;
+        snake = [
+          { x: x + 2, y },
+          { x: x + 1, y },
+          { x, y },
+        ];
+        placeFood();
+      }
+
+      function placeFood() {
+        const taken = new Set(snake.map(key));
+        const free = [];
+        for (let y = 0; y < rows; y++)
+          for (let x = 0; x < cols; x++) if (!taken.has(x + "," + y)) free.push({ x, y });
+        food = free.length ? free[(Math.random() * free.length) | 0] : null;
+      }
+
+      /** Cells reachable from `from` without crossing the body — keeps the demo alive. */
+      function room(from, body) {
+        const blocked = new Set(body.map(key));
+        const seen = new Set([key(from)]);
+        const queue = [from];
+        let n = 0;
+        while (queue.length && n < cols * rows) {
+          const p = queue.shift();
+          n++;
+          for (const d of DIRS) {
+            const q = { x: p.x + d.x, y: p.y + d.y };
+            const k = key(q);
+            if (!inside(q) || blocked.has(k) || seen.has(k)) continue;
+            seen.add(k);
+            queue.push(q);
+          }
+        }
+        return n;
+      }
+
+      function move() {
+        if (!food) return reset();
+        const head = snake[0];
+        const options = DIRS.map((d) => ({ x: head.x + d.x, y: head.y + d.y }))
+          .filter((p) => inside(p))
+          .filter((p) => {
+            const eats = p.x === food.x && p.y === food.y;
+            const kept = eats ? snake : snake.slice(0, -1);
+            return !kept.some((s) => s.x === p.x && s.y === p.y);
+          })
+          .map((p) => {
+            const eats = p.x === food.x && p.y === food.y;
+            const next = [p, ...(eats ? snake : snake.slice(0, -1))];
+            return {
+              p,
+              eats,
+              dist: Math.abs(p.x - food.x) + Math.abs(p.y - food.y),
+              space: room(p, next),
+            };
+          })
+          .sort((a, b) => b.space - a.space || a.dist - b.dist);
+
+        if (!options.length) return reset();
+        // Prefer the shortest step that still leaves the body room to breathe.
+        const safe = options.filter((o) => o.space >= snake.length + 2);
+        const pick = (safe.length ? safe.sort((a, b) => a.dist - b.dist) : options)[0];
+
+        snake = [pick.p, ...(pick.eats ? snake : snake.slice(0, -1))];
+        if (pick.eats) placeFood();
+        if (snake.length > cols * rows * 0.4) reset();
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (food) {
+          ctx.fillStyle = "#ff7675";
+          ctx.beginPath();
+          ctx.arc(food.x * CELL + CELL / 2, food.y * CELL + CELL / 2, CELL * 0.26, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        snake.forEach((p, i) => {
+          ctx.fillStyle = i === 0 ? "#00cec9" : "#6c5ce7";
+          ctx.beginPath();
+          ctx.roundRect(p.x * CELL + 2, p.y * CELL + 2, CELL - 4, CELL - 4, 4);
+          ctx.fill();
+        });
+      }
+
+      const still = matchMedia("(prefers-reduced-motion: reduce)");
+      function loop(now) {
+        requestAnimationFrame(loop);
+        acc += now - last;
+        last = now;
+        if (acc < 110 || still.matches) return;
+        acc = 0;
+        move();
+        draw();
+      }
+
+      addEventListener("resize", resize);
+      resize();
+      draw();
+      requestAnimationFrame(loop);
+    </script>
+  </body>
+</html>
