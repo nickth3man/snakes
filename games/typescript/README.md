@@ -1,8 +1,11 @@
 # Snake &middot; TypeScript
 
-A Snake game built with Phaser 3 and TypeScript, bundled with Vite. The most elaborate of the six:
-menu and game scenes, a self-playing demo mode, touch controls, a local leaderboard and a headless
-benchmark harness, over a game engine module with its own unit tests.
+A Snake game built with Phaser 3 and TypeScript, bundled with Vite. This is the original the other
+five languages are ported from: menu and game scenes, a self-playing demo mode with an AI-vision
+overlay, touch controls and a headless benchmark harness, over a game engine module with its own
+unit tests.
+
+(`src/leaderboard/` is written but not wired into either scene — nothing imports it.)
 
 ## Controls
 

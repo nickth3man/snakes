@@ -139,6 +139,12 @@
         color: #6b6b8a;
         max-width: 70ch;
       }
+      .note kbd {
+        border: 1px solid #2d3436;
+        border-radius: 4px;
+        padding: 1px 5px;
+        color: #a0a0c0;
+      }
       .note a,
       footer a {
         color: #a0a0c0;
@@ -172,8 +178,9 @@
         <div class="banner-text">
           <h1>SNAKES<span>_</span></h1>
           <p class="tagline">
-            One game, six languages. Identical rules and palette every time &mdash; what changes is
-            how the board gets from source code to your screen.
+            One game, six languages. Identical rules, menus and palette every time &mdash; what
+            changes is how the board gets from source code to your screen. Play it yourself, or
+            watch the same AI play it with its reasoning drawn on the board.
           </p>
         </div>
       </div>
@@ -182,11 +189,11 @@
       <div class="grid">
         <a class="card" href="typescript/" style="--accent: #4fa3ff">
           <h3>TypeScript</h3>
-          <p>Phaser 3 scenes, a tested game engine module, touch controls and a leaderboard.</p>
+          <p>Phaser 3 scenes over a tested engine module, with the demo AI and its vision overlay the other five are ported from.</p>
           <div class="chips">
             <span class="chip">PHASER 3</span>
             <span class="chip">VITE</span>
-            <span class="chip">VITEST</span>
+            <span class="chip">DEMO AI</span>
           </div>
           <span class="play">PLAY &rarr;</span>
         </a>
@@ -194,12 +201,13 @@
         <a class="card" href="rust/" style="--accent: #ff7675">
           <h3>Rust</h3>
           <p>
-            <code>no_std</code>, no wasm-bindgen. A ~3&nbsp;KB module keeps the board in linear
-            memory; JavaScript reads it and paints.
+            <code>no_std</code>, no wasm-bindgen, no allocator. Rules, AI and search all run in
+            29&nbsp;KB of wasm; JavaScript only paints what it finds in linear memory.
           </p>
           <div class="chips">
             <span class="chip">WASM32-UNKNOWN-UNKNOWN</span>
             <span class="chip">NO_STD</span>
+            <span class="chip">29 KB</span>
           </div>
           <span class="play">PLAY &rarr;</span>
         </a>
@@ -208,7 +216,7 @@
           <h3>Go</h3>
           <p>
             Go owns the whole frame: <code>syscall/js</code> reads the keyboard, drives
-            requestAnimationFrame and draws to the canvas.
+            requestAnimationFrame, updates the HUD and draws to the canvas.
           </p>
           <div class="chips">
             <span class="chip">GOOS=JS GOARCH=WASM</span>
@@ -221,7 +229,7 @@
           <h3>C</h3>
           <p>
             Freestanding <code>clang --target=wasm32</code>: no libc, no emscripten, no runtime.
-            Just static arrays and exported functions.
+            BFS and flood fill over static arrays.
           </p>
           <div class="chips">
             <span class="chip">CLANG</span>
@@ -234,8 +242,8 @@
         <a class="card" href="python/" style="--accent: #ffd479">
           <h3>Python</h3>
           <p>
-            Real CPython, compiled to WebAssembly by Pyodide. Dataclasses and
-            <code>random.choice</code> calling into the DOM.
+            Real CPython, compiled to WebAssembly by Pyodide. Dataclasses, <code>deque</code>
+            and <code>random.choice</code> calling into the DOM.
           </p>
           <div class="chips">
             <span class="chip">PYODIDE</span>
@@ -248,7 +256,7 @@
           <h3>Elm</h3>
           <p>
             No canvas and no draw loop. The board is a value, the view is a pure function of it,
-            and the result is SVG.
+            and even the AI overlay is just more SVG.
           </p>
           <div class="chips">
             <span class="chip">ELM 0.19.2</span>
@@ -260,8 +268,11 @@
       </div>
 
       <p class="note">
-        Same rules everywhere: a 24&times;24 board, walls are fatal, the tail is not, ten points an
-        apple and the clock speeds up as you grow. Every version is built from source by GitHub
+        Same game everywhere: a 30&times;22 board (18&times;38 in portrait), walls and your own body
+        are fatal, one point an apple, one move every 130&nbsp;ms. Each version has both a
+        <b>normal</b> mode and a <b>demo</b> mode driven by the same three-tier AI &mdash; press
+        <kbd>V</kbd> in demo to watch it think. Every port of that AI is held to decisions recorded
+        from the TypeScript original, so all six make identical moves. Built from source by GitHub
         Actions and deployed together.
       </p>
 

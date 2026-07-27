@@ -64,17 +64,38 @@ jobs:
       - name: Build Rust
         run: bash games/rust/build.sh "$PWD/_site/rust"
 
+      # Every port of the demo AI is held to decisions recorded from the
+      # original TypeScript controller in testdata/ai-trace.json.
+      - name: Check the Rust demo AI against the TypeScript one
+        working-directory: games/typescript
+        run: npx tsx ai-parity.mts ../rust/target/wasm32-unknown-unknown/release/snake_rs.wasm
+
       - name: Build Go
         run: bash games/go/build.sh "$PWD/_site/go"
+
+      - name: Test Go
+        working-directory: games/go
+        run: go test ./...
 
       - name: Build C
         run: bash games/c/build.sh "$PWD/_site/c"
 
+      - name: Check the C demo AI against the reference
+        working-directory: games/typescript
+        run: npx tsx ai-parity.mts "$PWD/../../_site/c/snake.wasm"
+
       - name: Build Python
         run: bash games/python/build.sh "$PWD/_site/python"
 
+      - name: Test Python
+        run: python -m unittest discover -s games/python
+
       - name: Build Elm
         run: bash games/elm/build.sh "$PWD/_site/elm"
+
+      - name: Check the Elm demo AI against the reference
+        working-directory: games/elm
+        run: node tests/verify.mjs
 
       - name: Check every game landed
         run: |

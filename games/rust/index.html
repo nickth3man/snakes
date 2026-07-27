@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <meta name="theme-color" content="#1a1a2e" />
     <meta name="color-scheme" content="dark" />
     <title>Snake &middot; Rust</title>
@@ -14,19 +17,17 @@
         padding: 0;
         box-sizing: border-box;
       }
+      html,
       body {
-        min-height: 100dvh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 16px;
-        padding: 16px;
+        height: 100%;
         background: #1a1a2e;
         color: #e8e8f0;
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         overscroll-behavior: none;
+        touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        -webkit-user-select: none;
       }
       a {
         color: #a0a0c0;
@@ -35,72 +36,272 @@
       a:hover {
         color: #00cec9;
       }
-      header {
-        width: min(92vw, 576px);
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-      h1 {
-        font-size: 20px;
-        letter-spacing: 0.08em;
-      }
-      h1 .lang {
-        color: #ff7675;
-      }
-      .hud {
-        display: flex;
-        gap: 18px;
-        font-size: 13px;
+      kbd {
+        border: 1px solid #2d3436;
+        border-radius: 4px;
+        padding: 1px 5px;
         color: #a0a0c0;
       }
-      .hud b {
+      .screen {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 16px;
+      }
+      .screen[hidden] {
+        display: none;
+      }
+
+      /* ── Menu ───────────────────────────────────────────────── */
+      #menu h1 {
+        font-size: clamp(34px, 9vw, 68px);
+        letter-spacing: 0.1em;
         color: #00cec9;
-        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+        text-align: center;
+      }
+      #menu h1 .lang {
+        display: block;
+        font-size: 0.3em;
+        letter-spacing: 0.2em;
+        color: #ff7675;
+      }
+      #menu .sub {
+        font-size: 14px;
+        color: #636e72;
+        margin-top: -8px;
+      }
+      .cards {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 18px 0;
+      }
+      .card {
+        width: 260px;
+        height: 160px;
+        border-radius: 14px;
+        border: 2px solid;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        background: transparent;
+        font: inherit;
+        transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.18s;
+        position: relative;
+        overflow: hidden;
+      }
+      .card::after {
+        content: "";
+        position: absolute;
+        left: 14px;
+        right: 14px;
+        top: 6px;
+        height: 1px;
+        background: currentColor;
+        opacity: 0.2;
+      }
+      .card .label {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+      .card .hint {
+        font-size: 14px;
+        color: #636e72;
+      }
+      .card.normal {
+        border-color: rgba(0, 206, 201, 0.55);
+        color: #00cec9;
+        background: rgba(0, 206, 201, 0.08);
+      }
+      .card.demo {
+        border-color: rgba(108, 92, 231, 0.55);
+        color: #6c5ce7;
+        background: rgba(108, 92, 231, 0.08);
+      }
+      .card.normal:hover,
+      .card.normal:focus-visible {
+        background: rgba(0, 206, 201, 0.22);
+        border-color: #00cec9;
+        transform: scale(1.05);
+        outline: none;
+      }
+      .card.demo:hover,
+      .card.demo:focus-visible {
+        background: rgba(108, 92, 231, 0.22);
+        border-color: #6c5ce7;
+        transform: scale(1.05);
+        outline: none;
+      }
+      .card:hover .label,
+      .card:focus-visible .label {
+        color: #fff;
+      }
+      .card:hover .hint,
+      .card:focus-visible .hint {
+        color: #b2bec3;
+      }
+      .card:active {
+        transform: scale(0.96);
+      }
+      #menu .best {
+        font-size: 16px;
+        color: #636e72;
+      }
+      #menu .ai-stats {
+        font-size: 14px;
+        color: #6c5ce7;
+      }
+      #menu .foot {
+        position: absolute;
+        bottom: max(10px, env(safe-area-inset-bottom));
+        font-size: 12px;
+        color: #6b6b8a;
+        display: flex;
+        gap: 14px;
+      }
+
+      /* ── Game ───────────────────────────────────────────────── */
+      #game {
+        justify-content: flex-start;
+        gap: 8px;
+      }
+      .hud {
+        width: 100%;
+        max-width: 1100px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 15px;
+        min-height: 32px;
+      }
+      .icon-btn {
+        background: none;
+        border: none;
+        color: #00cec9;
+        font: inherit;
+        font-size: 20px;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 4px 8px;
+        line-height: 1;
+      }
+      .icon-btn:hover {
+        color: #fff;
+      }
+      .pill {
+        background: #2d3436;
+        border-radius: 4px;
+        padding: 4px 10px;
+        display: inline-block;
+        transform-origin: center;
+      }
+      #score {
+        color: #ffeaa7;
+      }
+      #best {
+        color: #e0e0e0;
+        margin-left: auto;
+      }
+      #vision-btn {
+        background: none;
+        border: none;
+        font: inherit;
+        font-size: 14px;
+        color: #b2bec3;
+        cursor: pointer;
+        padding: 4px 6px;
+      }
+      #vision-btn[hidden] {
+        display: none;
+      }
+      #vision-btn.on {
+        color: #00cec9;
+      }
+      .pop {
+        animation: pop 0.24s ease-out;
+      }
+      @keyframes pop {
+        0% { transform: scale(1); }
+        45% { transform: scale(1.18); }
+        100% { transform: scale(1); }
       }
       .stage {
         position: relative;
-        width: min(92vw, 576px);
-        aspect-ratio: 1;
-        border: 1px solid #2d3436;
-        border-radius: 12px;
-        overflow: hidden;
-        background: #16213e;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        min-height: 0;
+        width: 100%;
         touch-action: none;
       }
       canvas {
         display: block;
-        width: 100%;
-        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        border: 2px solid #2d3436;
+        border-radius: 4px;
       }
-      .overlay {
+      .shake {
+        animation: shake 0.2s linear;
+      }
+      @keyframes shake {
+        0%, 100% { transform: translate(0, 0); }
+        25% { transform: translate(-3px, 2px); }
+        50% { transform: translate(3px, -2px); }
+        75% { transform: translate(-2px, -2px); }
+      }
+      #gameover {
         position: absolute;
-        inset: 0;
-        display: grid;
-        place-content: center;
-        gap: 10px;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
         text-align: center;
-        padding: 20px;
-        background: rgba(26, 26, 46, 0.86);
-        backdrop-filter: blur(2px);
+        font-size: 24px;
+        line-height: 1.35;
+        color: #ff6b6b;
+        white-space: pre;
+        pointer-events: none;
+        animation: reveal 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
-      .overlay[hidden] {
+      #gameover[hidden] {
         display: none;
       }
-      .overlay h2 {
-        font-size: 22px;
-        letter-spacing: 0.1em;
-        color: #00cec9;
+      @keyframes reveal {
+        from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
       }
-      .overlay p {
-        font-size: 13px;
-        color: #a0a0c0;
-        line-height: 1.6;
+      #tier-badge {
+        position: absolute;
+        left: 50%;
+        top: 8px;
+        transform: translateX(-50%);
+        font-size: 14px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: rgba(45, 52, 54, 0.9);
+        border: 1px solid #2d3436;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+      }
+      #tier-badge.show {
+        opacity: 1;
       }
       footer {
-        width: min(92vw, 576px);
+        width: 100%;
+        max-width: 1100px;
         display: flex;
         justify-content: space-between;
         gap: 12px;
@@ -108,154 +309,215 @@
         color: #6b6b8a;
         flex-wrap: wrap;
       }
-      kbd {
+
+      /* ── Touch D-pad ────────────────────────────────────────── */
+      #dpad {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        display: grid;
+        grid-template-columns: repeat(3, 52px);
+        grid-template-rows: repeat(3, 52px);
+        z-index: 5;
+      }
+      #dpad[hidden] {
+        display: none;
+      }
+      #dpad button {
+        background: rgba(45, 52, 54, 0.55);
         border: 1px solid #2d3436;
-        border-radius: 4px;
-        padding: 1px 5px;
-        color: #a0a0c0;
+        border-radius: 8px;
+        color: #00cec9;
+        font: inherit;
+        font-size: 22px;
+        cursor: pointer;
+      }
+      #dpad button:active {
+        background: rgba(0, 206, 201, 0.3);
+      }
+      #dpad .up { grid-area: 1 / 2; }
+      #dpad .left { grid-area: 2 / 1; }
+      #dpad .right { grid-area: 2 / 3; }
+      #dpad .down { grid-area: 3 / 2; }
+      @media (prefers-reduced-motion: reduce) {
+        .card, .pop, .shake, #gameover { animation: none; transition: none; }
       }
     </style>
   </head>
   <body>
-    <header>
-      <h1>SNAKE <span class="lang">// RUST</span></h1>
-      <div class="hud">
-        <span>SCORE <b id="score">0</b></span>
-        <span>BEST <b id="best">0</b></span>
+    <!-- ── Menu screen ────────────────────────────────────────── -->
+    <div class="screen" id="menu">
+      <h1>SNAKE<span class="lang">// RUST</span></h1>
+      <p class="sub">Choose your mode</p>
+      <div class="cards">
+        <button class="card normal" id="play-normal">
+          <span class="label">NORMAL</span>
+          <span class="hint">Tap or use arrow keys</span>
+        </button>
+        <button class="card demo" id="play-demo">
+          <span class="label">DEMO</span>
+          <span class="hint">Watch the AI</span>
+        </button>
       </div>
-    </header>
-
-    <div class="stage">
-      <canvas id="board" width="576" height="576"></canvas>
-      <div class="overlay" id="overlay">
-        <h2 id="overlay-title">RUST SNAKE</h2>
-        <p id="overlay-text">Compiling&hellip;</p>
+      <p class="best" id="menu-best">Best: &mdash;</p>
+      <p class="ai-stats" id="menu-ai">&nbsp;</p>
+      <div class="foot">
+        <span><kbd>N</kbd> normal &middot; <kbd>D</kbd> demo</span>
+        <a href="../">&larr; all snakes</a>
       </div>
     </div>
 
-    <footer>
-      <span><kbd>&larr;&uarr;&darr;&rarr;</kbd> / <kbd>WASD</kbd> move &middot; <kbd>P</kbd> pause &middot; swipe on mobile</span>
-      <a href="../">&larr; all snakes</a>
-    </footer>
+    <!-- ── Game screen ────────────────────────────────────────── -->
+    <div class="screen" id="game" hidden>
+      <div class="hud">
+        <button class="icon-btn" id="menu-btn" title="Menu (M)">&#9776;</button>
+        <span class="pill" id="score">Score: 0</span>
+        <span class="pill" id="best">Best: &mdash;</span>
+        <button id="vision-btn" hidden>AI Vision: off</button>
+      </div>
+
+      <div class="stage" id="stage">
+        <canvas id="board"></canvas>
+        <div id="gameover" hidden></div>
+        <div id="tier-badge"></div>
+      </div>
+
+      <footer>
+        <span id="controls-hint"></span>
+        <a href="../">&larr; all snakes</a>
+      </footer>
+
+      <div id="dpad" hidden>
+        <button class="up" data-dir="0">&uarr;</button>
+        <button class="left" data-dir="3">&larr;</button>
+        <button class="right" data-dir="1">&rarr;</button>
+        <button class="down" data-dir="2">&darr;</button>
+      </div>
+    </div>
 
     <script type="module">
-      const CELL = 24;
-      const canvas = document.getElementById("board");
-      const ctx = canvas.getContext("2d");
-      const overlay = document.getElementById("overlay");
-      const overlayTitle = document.getElementById("overlay-title");
-      const overlayText = document.getElementById("overlay-text");
-      const scoreEl = document.getElementById("score");
-      const bestEl = document.getElementById("best");
+      /* ──────────────────────────────────────────────────────────
+         The wasm module owns the rules and the demo AI. This file is
+         presentation: it drives the clock, reads the board out of linear
+         memory, paints it, and feeds input back in.
+         ────────────────────────────────────────────────────────── */
 
+      const WASM_URL = "snake.wasm";
       const BEST_KEY = "snake-rust-best";
+      const CELL = 24; // logical px per cell; the canvas is scaled by CSS
+      const TICK = 130; // ms per move, matching the TypeScript engine
+      const COLS = 30, ROWS = 22; // landscape
+      const COLS_PORTRAIT = 18, ROWS_PORTRAIT = 38;
+
+      const TIERS = [
+        { label: "Tier 1 · Safe Pursuit", color: "#00cec9" },
+        { label: "Tier 2 · Max Space", color: "#fdcb6e" },
+        { label: "Fallback · Toward Food", color: "#ff7675" },
+      ];
+
+      const $ = (id) => document.getElementById(id);
+      const menuScreen = $("menu"), gameScreen = $("game");
+      const canvas = $("board"), ctx = canvas.getContext("2d");
+      const scoreEl = $("score"), bestEl = $("best"), gameOverEl = $("gameover");
+      const badgeEl = $("tier-badge"), visionBtn = $("vision-btn"), dpad = $("dpad");
+
+      let wasm = null;
+      let mode = "normal";
+      let cols = COLS, rows = ROWS;
+      let running = false, paused = false, dead = false;
+      let acc = 0, last = 0;
       let best = Number(localStorage.getItem(BEST_KEY) || 0);
-      bestEl.textContent = best;
+      let showVision = false, lastTier = -1, badgeTimer = null;
 
-      let wasm, W, H, running = false, paused = false;
-      let interval = 120, acc = 0, last = 0;
+      // Juice state.
+      let particles = [];
+      let foodPop = 1, headPulse = 1, lastFoodCell = -1;
 
-      function grid() {
-        return new Uint8Array(wasm.memory.buffer, wasm.grid_ptr(), W * H);
+      const coarsePointer = matchMedia("(pointer: coarse)").matches;
+      const isPortrait = () => innerHeight > innerWidth;
+
+      /* ── Menu ────────────────────────────────────────────────── */
+
+      function showBest() {
+        const label = best > 0 ? `Best: ${best}` : "Best: —";
+        $("menu-best").textContent = label;
+        bestEl.textContent = label;
       }
 
-      function roundRect(x, y, w, h, r) {
-        ctx.beginPath();
-        ctx.roundRect(x, y, w, h, r);
-        ctx.fill();
+      fetch("benchmark.json")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((bm) => {
+          $("menu-ai").textContent =
+            bm && bm.runs > 0
+              ? `AI best: ${bm.max} · win rate: ${(bm.winRate * 100).toFixed(0)}%`
+              : " ";
+        })
+        .catch(() => {});
+
+      function openMenu() {
+        running = false;
+        gameScreen.hidden = true;
+        menuScreen.hidden = false;
+        showBest();
       }
 
-      function draw() {
-        ctx.fillStyle = "#1a1a2e";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      function startGame(next) {
+        if (!wasm) return;
+        mode = next;
+        menuScreen.hidden = true;
+        gameScreen.hidden = false;
 
-        ctx.strokeStyle = "#16213e";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        for (let i = 1; i < W; i++) {
-          ctx.moveTo(i * CELL + 0.5, 0);
-          ctx.lineTo(i * CELL + 0.5, canvas.height);
-        }
-        for (let j = 1; j < H; j++) {
-          ctx.moveTo(0, j * CELL + 0.5);
-          ctx.lineTo(canvas.width, j * CELL + 0.5);
-        }
-        ctx.stroke();
+        // Board shape follows the viewport, then stays put for the round.
+        cols = isPortrait() ? COLS_PORTRAIT : COLS;
+        rows = isPortrait() ? ROWS_PORTRAIT : ROWS;
+        canvas.width = cols * CELL;
+        canvas.height = rows * CELL;
+        canvas.style.aspectRatio = `${cols} / ${rows}`;
 
-        const cells = grid();
-        for (let i = 0; i < cells.length; i++) {
-          const tag = cells[i];
-          if (tag === 0) continue;
-          const x = (i % W) * CELL;
-          const y = Math.floor(i / W) * CELL;
-          if (tag === 3) {
-            ctx.fillStyle = "#ff7675";
-            ctx.beginPath();
-            ctx.arc(x + CELL / 2, y + CELL / 2, CELL * 0.32, 0, Math.PI * 2);
-            ctx.fill();
-          } else if (tag === 1) {
-            ctx.fillStyle = "#6c5ce7";
-            roundRect(x + 2, y + 2, CELL - 4, CELL - 4, 5);
-          } else {
-            ctx.fillStyle = "#00cec9";
-            roundRect(x + 1, y + 1, CELL - 2, CELL - 2, 6);
-            ctx.fillStyle = "#0a0a1e";
-            const r = CELL * 0.09;
-            ctx.beginPath();
-            ctx.arc(x + CELL * 0.35, y + CELL * 0.38, r, 0, Math.PI * 2);
-            ctx.arc(x + CELL * 0.65, y + CELL * 0.38, r, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-      }
-
-      function showOverlay(title, text) {
-        overlayTitle.textContent = title;
-        overlayText.innerHTML = text;
-        overlay.hidden = false;
-      }
-
-      function tick(now) {
-        requestAnimationFrame(tick);
-        if (!running || paused) {
-          last = now;
-          return;
-        }
-        acc += now - last;
-        last = now;
-        if (acc < interval) return;
-        acc = 0;
-
-        const result = wasm.step();
-        const score = wasm.score();
-        scoreEl.textContent = score;
-
-        if (result & 1) interval = Math.max(65, interval - 2);
-        if (result & 2 || result & 4) {
-          running = false;
-          if (score > best) {
-            best = score;
-            localStorage.setItem(BEST_KEY, String(best));
-            bestEl.textContent = best;
-          }
-          showOverlay(
-            result & 4 ? "PERFECT GAME" : "GAME OVER",
-            `Score <b>${score}</b> &middot; length ${wasm.length()}<br />Press <kbd>SPACE</kbd> or tap to play again`,
-          );
-        }
-        draw();
-      }
-
-      function newGame() {
-        interval = 120;
-        acc = 0;
+        wasm.init(cols, rows, (Math.random() * 0xffffffff) >>> 0);
+        dead = false;
         paused = false;
-        wasm.init((Math.random() * 0xffffffff) >>> 0);
-        scoreEl.textContent = "0";
-        overlay.hidden = true;
         running = true;
-        draw();
+        acc = 0;
+        particles = [];
+        foodPop = 1;
+        headPulse = 1;
+        lastFoodCell = wasm.food_cell();
+        showVision = false;
+        lastTier = -1;
+        badgeEl.classList.remove("show");
+
+        scoreEl.textContent = "Score: 0";
+        gameOverEl.hidden = true;
+        visionBtn.hidden = mode !== "demo";
+        visionBtn.textContent = "AI Vision: off";
+        visionBtn.classList.remove("on");
+        dpad.hidden = !(mode === "normal" && coarsePointer && !isPortrait());
+        $("controls-hint").innerHTML =
+          mode === "demo"
+            ? `<kbd>V</kbd> AI vision &middot; <kbd>M</kbd> menu &middot; <kbd>P</kbd> pause`
+            : `<kbd>&larr;&uarr;&darr;&rarr;</kbd> / <kbd>WASD</kbd> move &middot; <kbd>M</kbd> menu &middot; <kbd>P</kbd> pause &middot; swipe on mobile`;
+        showBest();
       }
+
+      $("play-normal").addEventListener("click", () => startGame("normal"));
+      $("play-demo").addEventListener("click", () => startGame("demo"));
+      $("menu-btn").addEventListener("click", openMenu);
+      visionBtn.addEventListener("click", toggleVision);
+
+      function toggleVision() {
+        if (mode !== "demo") return;
+        showVision = !showVision;
+        visionBtn.textContent = `AI Vision: ${showVision ? "on" : "off"}`;
+        visionBtn.classList.toggle("on", showVision);
+        if (!showVision) {
+          lastTier = -1;
+          badgeEl.classList.remove("show");
+          if (badgeTimer) clearTimeout(badgeTimer);
+        }
+      }
+
+      /* ── Input ───────────────────────────────────────────────── */
 
       const KEYS = {
         ArrowUp: 0, KeyW: 0,
@@ -266,66 +528,345 @@
 
       addEventListener("keydown", (e) => {
         if (!wasm) return;
-        if (e.code in KEYS) {
-          e.preventDefault();
-          if (running && !paused) wasm.set_dir(KEYS[e.code]);
-          else if (!running && !paused) newGame();
+
+        if (!menuScreen.hidden) {
+          if (e.code === "KeyN") startGame("normal");
+          else if (e.code === "KeyD") startGame("demo");
           return;
         }
-        if (e.code === "Space" || e.code === "Enter") {
+
+        if (e.code in KEYS && mode === "normal") {
           e.preventDefault();
-          if (!running) newGame();
-        } else if (e.code === "KeyP" && running) {
-          paused = !paused;
-          if (paused) showOverlay("PAUSED", "Press <kbd>P</kbd> to resume");
-          else overlay.hidden = true;
+          if (!dead) wasm.queue_dir(KEYS[e.code]);
+          return;
+        }
+        switch (e.code) {
+          case "Space":
+          case "Enter":
+            e.preventDefault();
+            restartIfDead();
+            break;
+          case "KeyM":
+            openMenu();
+            break;
+          case "KeyV":
+            toggleVision();
+            break;
+          case "KeyP":
+            if (!dead) paused = !paused;
+            break;
         }
       });
 
+      function restartIfDead() {
+        if (dead) startGame(mode);
+      }
+
+      // Swipe to steer, tap to restart.
       let touch = null;
-      const stage = document.querySelector(".stage");
+      const stage = $("stage");
       stage.addEventListener("touchstart", (e) => {
-        touch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        const t = e.touches[0];
+        touch = { x: t.clientX, y: t.clientY, fired: false };
       }, { passive: true });
-      stage.addEventListener("touchend", (e) => {
-        if (!wasm || !touch) return;
-        const t = e.changedTouches[0];
-        const dx = t.clientX - touch.x;
-        const dy = t.clientY - touch.y;
+      stage.addEventListener("touchmove", (e) => {
+        if (!touch || touch.fired || mode !== "normal" || dead) return;
+        const t = e.touches[0];
+        const dx = t.clientX - touch.x, dy = t.clientY - touch.y;
+        if (Math.hypot(dx, dy) < 24) return;
+        touch.fired = true;
+        wasm.queue_dir(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 1 : 3) : dy > 0 ? 2 : 0);
+      }, { passive: true });
+      stage.addEventListener("touchend", () => {
+        if (touch && !touch.fired) restartIfDead();
         touch = null;
-        if (Math.hypot(dx, dy) < 24) {
-          if (!running) newGame();
-          return;
-        }
-        if (!running) return newGame();
-        if (Math.abs(dx) > Math.abs(dy)) wasm.set_dir(dx > 0 ? 1 : 3);
-        else wasm.set_dir(dy > 0 ? 2 : 0);
       }, { passive: true });
+      stage.addEventListener("click", restartIfDead);
+
+      for (const btn of dpad.querySelectorAll("button")) {
+        btn.addEventListener("pointerdown", (e) => {
+          e.preventDefault();
+          if (!dead) wasm.queue_dir(Number(btn.dataset.dir));
+        });
+      }
+
+      addEventListener("resize", () => {
+        if (running && mode === "normal") {
+          dpad.hidden = !(coarsePointer && !isPortrait());
+        }
+      });
+
+      /* ── Frame loop ──────────────────────────────────────────── */
+
+      function tick(now) {
+        requestAnimationFrame(tick);
+        const dt = Math.min(now - last, 100);
+        last = now;
+        if (!running) return;
+
+        if (!dead && !paused) {
+          acc += dt;
+          if (acc >= TICK) {
+            acc = 0;
+            advance();
+          }
+        }
+
+        // Tweens run every frame regardless of the game clock.
+        foodPop = Math.min(1, foodPop + dt / 200);
+        headPulse += (1 - headPulse) * Math.min(1, dt / 90);
+        for (const p of particles) {
+          p.life -= dt;
+          p.x += p.vx * dt * 0.001;
+          p.y += p.vy * dt * 0.001;
+        }
+        particles = particles.filter((p) => p.life > 0);
+
+        draw();
+      }
+
+      function advance() {
+        if (mode === "demo") {
+          const tier = wasm.ai_decide();
+          if (showVision) showTierBadge(tier);
+        }
+
+        const before = wasm.score();
+        const result = wasm.step();
+        const score = wasm.score();
+        scoreEl.textContent = `Score: ${score}`;
+
+        if (score > before) {
+          pulse(scoreEl);
+          headPulse = 1.15;
+          spawnParticles();
+        }
+        if (wasm.food_cell() !== lastFoodCell) {
+          lastFoodCell = wasm.food_cell();
+          foodPop = 0;
+        }
+
+        if (result & 2 || result & 4) {
+          dead = true;
+          if (score > best) {
+            best = score;
+            localStorage.setItem(BEST_KEY, String(best));
+          }
+          showBest();
+          gameOverEl.textContent =
+            result & 4 ? "You Win!\nTap to retry" : "Game Over\nTap to retry";
+          gameOverEl.hidden = false;
+          // Restart the reveal animation.
+          gameOverEl.style.animation = "none";
+          void gameOverEl.offsetWidth;
+          gameOverEl.style.animation = "";
+          badgeEl.classList.remove("show");
+          if (result & 2) shake();
+        }
+      }
+
+      function pulse(el) {
+        el.classList.remove("pop");
+        void el.offsetWidth;
+        el.classList.add("pop");
+      }
+
+      function shake() {
+        canvas.classList.remove("shake");
+        void canvas.offsetWidth;
+        canvas.classList.add("shake");
+      }
+
+      function showTierBadge(tier) {
+        if (tier === lastTier) return;
+        lastTier = tier;
+        const { label, color } = TIERS[tier];
+        badgeEl.textContent = label;
+        badgeEl.style.color = color;
+        badgeEl.classList.add("show");
+        if (badgeTimer) clearTimeout(badgeTimer);
+        badgeTimer = setTimeout(() => badgeEl.classList.remove("show"), 2500);
+      }
+
+      function spawnParticles() {
+        const head = headCell();
+        if (head < 0) return;
+        const cx = (head % cols) * CELL + CELL / 2;
+        const cy = Math.floor(head / cols) * CELL + CELL / 2;
+        for (let i = 0; i < 20; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 40 + Math.random() * 100;
+          particles.push({
+            x: cx, y: cy,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 300 + Math.random() * 300,
+            max: 600,
+          });
+        }
+      }
+
+      /* ── Rendering ───────────────────────────────────────────── */
+
+      const grid = () => new Uint8Array(wasm.memory.buffer, wasm.grid_ptr(), cols * rows);
+      const headCell = () => {
+        const g = grid();
+        return g.indexOf(2);
+      };
+
+      function draw() {
+        const g = grid();
+        const alpha = dead ? 0.4 : 1;
+
+        ctx.fillStyle = "#1a1a2e";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Grid lines.
+        ctx.strokeStyle = "rgba(22, 33, 62, 0.55)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let x = 0; x <= cols; x++) {
+          ctx.moveTo(x * CELL + 0.5, 0);
+          ctx.lineTo(x * CELL + 0.5, canvas.height);
+        }
+        for (let y = 0; y <= rows; y++) {
+          ctx.moveTo(0, y * CELL + 0.5);
+          ctx.lineTo(canvas.width, y * CELL + 0.5);
+        }
+        ctx.stroke();
+
+        if (mode === "demo" && showVision) drawVision();
+
+        ctx.globalAlpha = alpha;
+
+        // Body.
+        ctx.fillStyle = "#6c5ce7";
+        for (let i = 0; i < g.length; i++) {
+          if (g[i] !== 1) continue;
+          ctx.fillRect((i % cols) * CELL + 1, Math.floor(i / cols) * CELL + 1, CELL - 2, CELL - 2);
+        }
+
+        // Food, with a pop-in as it spawns.
+        const food = wasm.food_cell();
+        if (food >= 0) {
+          const fx = (food % cols) * CELL + CELL / 2;
+          const fy = Math.floor(food / cols) * CELL + CELL / 2;
+          const ease = 1 - Math.pow(1 - foodPop, 3);
+          ctx.fillStyle = "#ff7675";
+          ctx.beginPath();
+          ctx.arc(fx, fy, Math.max(0.5, (CELL / 2 - 2) * ease), 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Head: glow, body, direction-aware eyes.
+        const head = g.indexOf(2);
+        if (head >= 0) {
+          const hx = (head % cols) * CELL + CELL / 2;
+          const hy = Math.floor(head / cols) * CELL + CELL / 2;
+          const size = (CELL - 1) * headPulse;
+
+          if (!dead) {
+            ctx.globalAlpha = alpha * 0.18;
+            ctx.fillStyle = "#00cec9";
+            ctx.fillRect(hx - (CELL + 6) / 2, hy - (CELL + 6) / 2, CELL + 6, CELL + 6);
+            ctx.globalAlpha = alpha;
+          }
+
+          ctx.fillStyle = "#00cec9";
+          ctx.fillRect(hx - size / 2, hy - size / 2, size, size);
+
+          if (!dead) {
+            const dir = wasm.direction();
+            const off = CELL * 0.22;
+            const eyes =
+              dir === 0 ? [[-off, -off], [off, -off]]
+              : dir === 2 ? [[-off, off], [off, off]]
+              : dir === 3 ? [[-off, -off], [-off, off]]
+              : [[off, -off], [off, off]];
+            ctx.fillStyle = "#0a0a1e";
+            for (const [ex, ey] of eyes) {
+              ctx.beginPath();
+              ctx.arc(hx + ex, hy + ey, Math.max(1.5, CELL * 0.12), 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+        }
+
+        ctx.globalAlpha = 1;
+
+        // Eat particles.
+        for (const p of particles) {
+          const t = Math.max(0, p.life / p.max);
+          ctx.globalAlpha = t;
+          ctx.fillStyle = "#ff7675";
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 4 * t, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        if (paused && !dead) {
+          ctx.fillStyle = "rgba(26, 26, 46, 0.7)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "#00cec9";
+          ctx.font = "bold 22px ui-monospace, monospace";
+          ctx.textAlign = "center";
+          ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
+        }
+      }
+
+      /** The AI's reasoning: reachable region shaded, planned path dashed. */
+      function drawVision() {
+        const reach = new Uint16Array(
+          wasm.memory.buffer, wasm.ai_reachable_ptr(), wasm.ai_reachable_len(),
+        );
+        ctx.fillStyle = "rgba(108, 92, 231, 0.15)";
+        for (const cell of reach) {
+          ctx.fillRect((cell % cols) * CELL + 1, Math.floor(cell / cols) * CELL + 1, CELL - 2, CELL - 2);
+        }
+
+        const pathLen = wasm.ai_path_len();
+        if (pathLen < 2) return;
+        const path = new Uint16Array(wasm.memory.buffer, wasm.ai_path_ptr(), pathLen);
+        ctx.strokeStyle = "rgba(255, 118, 117, 0.9)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 1; i < path.length; i++) {
+          const x1 = (path[i - 1] % cols) * CELL + CELL / 2;
+          const y1 = Math.floor(path[i - 1] / cols) * CELL + CELL / 2;
+          const x2 = (path[i] % cols) * CELL + CELL / 2;
+          const y2 = Math.floor(path[i] / cols) * CELL + CELL / 2;
+          const dx = x2 - x1, dy = y2 - y1;
+          const steps = Math.floor(Math.hypot(dx, dy) / 6);
+          if (steps < 1) {
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            continue;
+          }
+          for (let s = 0; s < steps; s += 2) {
+            ctx.moveTo(x1 + (s * dx) / steps, y1 + (s * dy) / steps);
+            ctx.lineTo(x1 + ((s + 1) * dx) / steps, y1 + ((s + 1) * dy) / steps);
+          }
+        }
+        ctx.stroke();
+      }
+
+      /* ── Boot ────────────────────────────────────────────────── */
 
       (async () => {
         try {
-          const bytes = await fetch("snake.wasm").then((r) => {
+          const bytes = await fetch(WASM_URL).then((r) => {
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
             return r.arrayBuffer();
           });
           const { instance } = await WebAssembly.instantiate(bytes, {});
           wasm = instance.exports;
-          W = wasm.width();
-          H = wasm.height();
-          canvas.width = W * CELL;
-          canvas.height = H * CELL;
-          wasm.init((Math.random() * 0xffffffff) >>> 0);
-          draw();
-          showOverlay("RUST SNAKE", "Press <kbd>SPACE</kbd> or tap to start");
+          showBest();
           requestAnimationFrame(tick);
         } catch (err) {
-          showOverlay("LOAD FAILED", String(err));
+          $("menu-ai").textContent = `Failed to load: ${err}`;
         }
       })();
-
-      stage.addEventListener("click", () => {
-        if (!running && wasm && !paused) newGame();
-      });
     </script>
   </body>
 </html>

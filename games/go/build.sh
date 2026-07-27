@@ -25,4 +25,9 @@ fi
 
 cp "$here/index.html" "$out/"
 
+# The demo AI is the same in every language, so every menu shows the same
+# benchmark numbers, produced by `npm run benchmark` in games/typescript.
+bench="$here/../typescript/public/benchmark.json"
+if [ -f "$bench" ]; then cp "$bench" "$out/benchmark.json"; fi
+
 echo "go -> $out ($(wc -c < "$out/snake.wasm") bytes of wasm)"
