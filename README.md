@@ -111,4 +111,9 @@ the same build without deploying. The Pages source is set to GitHub Actions.
 
 ## License
 
+## Documentation
+
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — as-built architecture (graph-backed)
+- [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — setup, tests, AI change workflow
+
 MIT — see [LICENSE](LICENSE).

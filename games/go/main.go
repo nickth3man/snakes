@@ -102,8 +102,6 @@ func main() {
 	select {} // keep the Go runtime alive for the callbacks
 }
 
-/* ──────────── Wiring ──────────── */
-
 func (u *ui) on(target js.Value, event string, fn func(js.Value)) {
 	cb := js.FuncOf(func(_ js.Value, args []js.Value) any {
 		var e js.Value
@@ -232,8 +230,6 @@ func (u *ui) bind() {
 	}
 }
 
-/* ──────────── Screens ──────────── */
-
 func (u *ui) portrait() bool {
 	return js.Global().Get("innerHeight").Int() > js.Global().Get("innerWidth").Int()
 }
@@ -318,8 +314,6 @@ func (u *ui) toggleVision() {
 	}
 }
 
-/* ──────────── Scores ──────────── */
-
 func (u *ui) loadBest() int {
 	v := js.Global().Get("localStorage").Call("getItem", bestKey)
 	if v.IsNull() || v.IsUndefined() {
@@ -359,13 +353,9 @@ func (u *ui) loadBenchmark() {
 		return args[0].Call("json")
 	})
 	u.holds = append(u.holds, parse)
-	fail := js.FuncOf(func(_ js.Value, _ []js.Value) any { return nil })
-	u.holds = append(u.holds, fail)
 	js.Global().Call("fetch", "benchmark.json").
-		Call("then", parse).Call("then", then).Call("catch", fail)
+		Call("then", parse).Call("then", then)
 }
-
-/* ──────────── Frame loop ──────────── */
 
 func (u *ui) loop() {
 	var frame js.Func
@@ -496,8 +486,6 @@ func (u *ui) spawnParticles() {
 		})
 	}
 }
-
-/* ──────────── Rendering ──────────── */
 
 func (u *ui) draw() {
 	ctx := u.ctx

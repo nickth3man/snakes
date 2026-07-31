@@ -36,7 +36,6 @@ type move struct {
 func Decide(g *Game) Decision {
 	head := g.snake[0]
 
-	// Step 1: immediate moves that are not reversals, walls or body cells.
 	var moves []move
 	for _, d := range Dirs {
 		if len(g.snake) > 1 && opposite(d, g.dir) {
@@ -66,7 +65,6 @@ func Decide(g *Game) Decision {
 		}
 	}
 
-	// Step 2: tier 1 — reach the food while keeping room to breathe.
 	if g.food != nil {
 		bestIdx, bestLen, bestHugs, bestTurns := -1, 0, 0, 0
 		for i, m := range moves {
@@ -102,7 +100,6 @@ func Decide(g *Game) Decision {
 		}
 	}
 
-	// Step 3: tier 2 — head for the most open space.
 	{
 		bestIdx, bestSpace, bestHug, bestDist := -1, 0, 0, 0
 		for i, m := range moves {
@@ -133,7 +130,6 @@ func Decide(g *Game) Decision {
 		}
 	}
 
-	// Step 4: fallback — lunge at the food and hope.
 	chosen := moves[0]
 	if g.food != nil {
 		bestDist := 1 << 30
@@ -245,7 +241,6 @@ func (g *Game) wallHugs(path []Point) int {
 	return n
 }
 
-// countTurns counts direction changes along a path.
 func countTurns(path []Point) int {
 	if len(path) < 3 {
 		return 0
