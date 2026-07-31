@@ -32,7 +32,6 @@ type move struct {
 	next Point
 }
 
-// Decide picks the AI's next direction and explains itself.
 func Decide(g *Game) Decision {
 	head := g.snake[0]
 
@@ -41,8 +40,11 @@ func Decide(g *Game) Decision {
 		if len(g.snake) > 1 && opposite(d, g.dir) {
 			continue
 		}
-		next := head.add(d)
-		if !g.inBounds(next) || g.occupiedAt(next) {
+		next, ok := g.stepFrom(head, d)
+		if !ok {
+			continue
+		}
+		if g.occupiedAt(next) {
 			continue
 		}
 		moves = append(moves, move{d, next})
@@ -147,7 +149,6 @@ func Decide(g *Game) Decision {
 	}
 }
 
-// bfs returns the shortest path from start to goal inclusive, or nil.
 func (g *Game) bfs(start, goal Point, blocked []bool) []Point {
 	if blocked[g.index(start)] {
 		return nil
@@ -168,8 +169,8 @@ func (g *Game) bfs(start, goal Point, blocked []bool) []Point {
 		pos := queue[0]
 		queue = queue[1:]
 		for _, d := range Dirs {
-			next := pos.add(d)
-			if !g.inBounds(next) {
+			next, ok := g.stepFrom(pos, d)
+			if !ok {
 				continue
 			}
 			ni := g.index(next)
@@ -199,7 +200,6 @@ func (g *Game) bfs(start, goal Point, blocked []bool) []Point {
 	return nil
 }
 
-// flood returns every cell reachable from start without crossing an obstacle.
 func (g *Game) flood(start Point, blocked []bool) []Point {
 	if blocked[g.index(start)] {
 		return nil
@@ -211,8 +211,8 @@ func (g *Game) flood(start Point, blocked []bool) []Point {
 	for i := 0; i < len(cells); i++ {
 		pos := cells[i]
 		for _, d := range Dirs {
-			next := pos.add(d)
-			if !g.inBounds(next) {
+			next, ok := g.stepFrom(pos, d)
+			if !ok {
 				continue
 			}
 			ni := g.index(next)

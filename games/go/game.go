@@ -38,6 +38,7 @@ type Game struct {
 	score      int
 	alive      bool
 	won        bool
+	wrap       bool // when true, the board is a torus: leaving one edge enters the opposite
 	rng        *rand.Rand
 }
 
@@ -45,6 +46,36 @@ func NewGame(cols, rows int, seed int64) *Game {
 	g := &Game{cols: cols, rows: rows, rng: rand.New(rand.NewSource(seed))}
 	g.Start()
 	return g
+}
+
+// SetWrap toggles torus mode. Movement, BFS, flood fill, and the wall-adjacency
+// heuristic all read this flag. The board shape does not change.
+func (g *Game) SetWrap(wrap bool) { g.wrap = wrap }
+
+// Wrap reports whether torus mode is on. Exposed for the UI and for tests.
+func (g *Game) Wrap() bool { return g.wrap }
+
+// wrapPoint folds a coordinate back into the board. Used in wrap mode to
+// realise "leaving one edge enters the opposite" without the caller having
+// to know about the board size.
+func (g *Game) wrapPoint(p Point) Point {
+	x := ((p.X % g.cols) + g.cols) % g.cols
+	y := ((p.Y % g.rows) + g.rows) % g.rows
+	return Point{x, y}
+}
+
+// stepFrom returns the cell the head lands on after moving one step in d. In
+// wrap mode the cell is always on the board; in wall mode an out-of-bounds
+// step returns ok=false so the caller can declare it a death.
+func (g *Game) stepFrom(p Point, d Point) (next Point, ok bool) {
+	next = p.add(d)
+	if g.wrap {
+		return g.wrapPoint(next), true
+	}
+	if !g.inBounds(next) {
+		return Point{}, false
+	}
+	return next, true
 }
 
 // Start deals the opening position: three cells, mid-row, facing right.
@@ -118,12 +149,10 @@ func (g *Game) ForceDir(d Point) {
 	g.queue = append(g.queue[:0], d)
 }
 
-// Step advances one move and reports what happened.
 func (g *Game) Step() (ate, died, won bool) {
 	if !g.alive {
 		return false, true, g.won
 	}
-
 	want := g.dir
 	if len(g.queue) > 0 {
 		want = g.queue[0]
@@ -134,8 +163,8 @@ func (g *Game) Step() (ate, died, won bool) {
 		g.dir = want
 	}
 
-	next := g.snake[0].add(g.dir)
-	if !g.inBounds(next) {
+	next, ok := g.stepFrom(g.snake[0], g.dir)
+	if !ok {
 		g.alive = false
 		return false, true, false
 	}

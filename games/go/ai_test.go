@@ -145,3 +145,174 @@ func TestGameRules(t *testing.T) {
 		t.Error("stepping onto the tail should be fatal")
 	}
 }
+
+// newWrapGame returns a deterministic wrap-mode game. The seed pins the food
+// spawn so tests can target a specific open cell.
+func newWrapGame(cols, rows int) *Game {
+	g := NewGame(cols, rows, 42)
+	g.SetWrap(true)
+	return g
+}
+
+// TestWrapMovement covers the head crossing each of the four edges.
+func TestWrapMovement(t *testing.T) {
+	cases := []struct {
+		name  string
+		setup func(g *Game)
+		want  Point
+		died  bool
+	}{
+		{
+			name: "right wraps to left",
+			setup: func(g *Game) {
+				g.snake = []Point{{g.cols - 1, 5}, {g.cols - 2, 5}, {g.cols - 3, 5}}
+				g.dir = Right
+			},
+			want: Point{0, 5},
+		},
+		{
+			name: "left wraps to right",
+			setup: func(g *Game) {
+				g.snake = []Point{{0, 5}, {1, 5}, {2, 5}}
+				g.dir = Left
+			},
+			want: Point{9, 5},
+		},
+		{
+			name: "down wraps to top",
+			setup: func(g *Game) {
+				g.snake = []Point{{5, g.rows - 1}, {5, g.rows - 2}, {5, g.rows - 3}}
+				g.dir = Down
+			},
+			want: Point{5, 0},
+		},
+		{
+			name: "up wraps to bottom",
+			setup: func(g *Game) {
+				g.snake = []Point{{5, 0}, {5, 1}, {5, 2}}
+				g.dir = Up
+			},
+			want: Point{5, 9},
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			g := newWrapGame(10, 10)
+			for i := range g.occupied {
+				g.occupied[i] = false
+			}
+			c.setup(g)
+			for _, p := range g.snake {
+				g.occupied[g.index(p)] = true
+			}
+			ate, died, _ := g.Step()
+			if died != c.died {
+				t.Fatalf("died=%v, want %v", died, c.died)
+			}
+			if g.snake[0] != c.want {
+				t.Fatalf("head at %v, want %v", g.snake[0], c.want)
+			}
+			if !ate && g.food != nil && *g.food == c.want {
+				t.Fatalf("head landed on food without ate=true")
+			}
+		})
+	}
+}
+
+// TestWrapSurvivesBodyWrap puts a long snake next to the edge and steps it
+// across. In wrap mode this must not self-collide because the tail moves out
+// of the way on the same tick.
+func TestWrapSurvivesBodyWrap(t *testing.T) {
+	g := newWrapGame(8, 8)
+	// Snake hugs the right edge, head at the corner.
+	g.snake = []Point{{7, 4}, {6, 4}, {5, 4}, {4, 4}, {3, 4}}
+	g.dir = Right
+	for i := range g.occupied {
+		g.occupied[i] = false
+	}
+	for _, p := range g.snake {
+		g.occupied[g.index(p)] = true
+	}
+	// One step: head wraps to (0, 4), tail (3, 4) is freed, no collision.
+	if _, died, _ := g.Step(); died {
+		t.Fatal("wrap step killed a non-overlapping snake")
+	}
+	if g.snake[0] != (Point{0, 4}) {
+		t.Fatalf("head at %v, want {0 4}", g.snake[0])
+	}
+}
+
+// TestWrapBFSCrossesEdge: a path that requires leaving one edge and entering
+// the opposite must be found by BFS in wrap mode.
+func TestWrapBFSCrossesEdge(t *testing.T) {
+	g := newWrapGame(6, 6)
+	start := Point{5, 3} // right edge
+	goal := Point{0, 3}  // left edge, one wrap away
+	blocked := make([]bool, g.cols*g.rows)
+	path := g.bfs(start, goal, blocked)
+	if path == nil {
+		t.Fatal("BFS returned nil; wrap path should exist")
+	}
+	if path[0] != start || path[len(path)-1] != goal {
+		t.Fatalf("BFS path endpoints wrong: start=%v end=%v", path[0], path[len(path)-1])
+	}
+	// On a 6-wide board, the wrap path is exactly 2 cells: (5,3) -> (0,3).
+	if len(path) != 2 {
+		t.Fatalf("expected 2-cell wrap path, got %d: %v", len(path), path)
+	}
+}
+
+// TestWrapFloodCountsAllCells: on an empty wrap board, the flood fill from any
+// cell should reach every cell of the board.
+func TestWrapFloodCountsAllCells(t *testing.T) {
+	g := newWrapGame(5, 5)
+	blocked := make([]bool, g.cols*g.rows)
+	cells := g.flood(Point{0, 0}, blocked)
+	if len(cells) != g.cols*g.rows {
+		t.Fatalf("flood reached %d cells, want %d", len(cells), g.cols*g.rows)
+	}
+}
+
+// TestWrapOffStaysOriginal confirms the toggle is not one-way. Walls must kill
+// the snake after SetWrap(false), even on a board the snake just survived in
+// wrap mode.
+func TestWrapOffStaysOriginal(t *testing.T) {
+	g := newWrapGame(6, 6)
+	g.snake = []Point{{5, 3}, {4, 3}, {3, 3}, {2, 3}}
+	g.dir = Right
+	for i := range g.occupied {
+		g.occupied[i] = false
+	}
+	for _, p := range g.snake {
+		g.occupied[g.index(p)] = true
+	}
+	if _, died, _ := g.Step(); died {
+		t.Fatal("wrap step should not kill the snake")
+	}
+	// Now disable wrap and step the head at (0,3) left — it must die on the
+	// left wall instead of wrapping.
+	g.SetWrap(false)
+	g.dir = Left
+	if _, died, _ := g.Step(); !died {
+		t.Fatal("non-wrap mode must kill at the wall")
+	}
+}
+
+// TestWrapDecideStillPicksLegalMove: in wrap mode, Decide must not return a
+// direction whose next cell is the snake's neck.
+func TestWrapDecideStillPicksLegalMove(t *testing.T) {
+	g := newWrapGame(8, 8)
+	// Force a tail that demands the head move DOWN.
+	g.snake = []Point{{4, 4}, {4, 5}, {5, 5}, {5, 4}}
+	g.dir = Right
+	for i := range g.occupied {
+		g.occupied[i] = false
+	}
+	for _, p := range g.snake {
+		g.occupied[g.index(p)] = true
+	}
+	d := Decide(g)
+	if opposite(d.Dir, g.dir) {
+		t.Fatalf("AI chose reversal %v against dir %v", d.Dir, g.dir)
+	}
+}

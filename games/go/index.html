@@ -335,14 +335,30 @@
       #dpad button:active {
         background: rgba(0, 206, 201, 0.3);
       }
-      #dpad .up { grid-area: 1 / 2; }
-      #dpad .left { grid-area: 2 / 1; }
-      #dpad .right { grid-area: 2 / 3; }
-      #dpad .down { grid-area: 3 / 2; }
+      .card.wrap {
+        border-color: rgba(253, 203, 110, 0.55);
+        color: #fdcb6e;
+        background: rgba(253, 203, 110, 0.08);
+      }
+      .card.wrap:hover,
+      .card.wrap:focus-visible {
+        background: rgba(253, 203, 110, 0.22);
+        border-color: #fdcb6e;
+        transform: scale(1.05);
+        outline: none;
+      }
+      .card.wrap.on {
+        background: rgba(253, 203, 110, 0.28);
+        border-color: #ffeaa7;
+        color: #ffeaa7;
+      }
+      .wrap-pill {
+        color: #fdcb6e;
+        border: 1px solid rgba(253, 203, 110, 0.55);
+      }
       @media (prefers-reduced-motion: reduce) {
         .card, .pop, .shake, #gameover { animation: none; transition: none; }
       }
-    </style>
   </head>
   <body>
     <div class="screen" id="menu">
@@ -357,11 +373,15 @@
           <span class="label">DEMO</span>
           <span class="hint">Watch the AI</span>
         </button>
+        <button class="card wrap" id="play-wrap" aria-pressed="false">
+          <span class="label">WRAP</span>
+          <span class="hint">Torus walls (toggle)</span>
+        </button>
       </div>
       <p class="best" id="menu-best">Best: &mdash;</p>
       <p class="ai-stats" id="menu-ai">Loading the Go runtime&hellip;</p>
       <div class="foot">
-        <span><kbd>N</kbd> normal &middot; <kbd>D</kbd> demo</span>
+        <span><kbd>N</kbd> normal &middot; <kbd>D</kbd> demo &middot; <kbd>T</kbd> wrap</span>
         <a href="../">&larr; all snakes</a>
       </div>
     </div>
@@ -371,10 +391,9 @@
         <button class="icon-btn" id="menu-btn" title="Menu (M)">&#9776;</button>
         <span class="pill" id="score">Score: 0</span>
         <span class="pill" id="best">Best: &mdash;</span>
+        <span class="pill wrap-pill" id="wrap-pill" hidden>WRAP</span>
         <button id="vision-btn" hidden>AI Vision: off</button>
       </div>
-
-      <div class="stage" id="stage">
         <canvas id="board"></canvas>
         <div id="gameover" hidden></div>
         <div id="tier-badge"></div>

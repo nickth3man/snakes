@@ -51,11 +51,13 @@ type ui struct {
 	scoreEl, bestEl, menuBestEl   js.Value
 	menuAIEl, gameOverEl, badgeEl js.Value
 	visionBtn, dpad, hintEl       js.Value
+	wrapBtn, wrapPill             js.Value
 
 	game *Game
 	mode mode
 
 	running, dead, paused bool
+	wrap                  bool
 	acc, last             float64
 	best                  int
 
@@ -74,6 +76,24 @@ type ui struct {
 	holds          []js.Func // keep callbacks alive
 }
 
+// toggleWrap flips the wall-wrap mode and re-arms the HUD pill. Safe to call
+// from the menu or in-game.
+func (u *ui) toggleWrap() {
+	u.wrap = !u.wrap
+	if u.game != nil {
+		u.game.SetWrap(u.wrap)
+	}
+	if u.wrapPill.IsUndefined() || u.wrapPill.IsNull() {
+		return
+	}
+	if u.wrap {
+		u.wrapPill.Set("textContent", "WRAP")
+		u.wrapPill.Set("hidden", false)
+	} else {
+		u.wrapPill.Set("hidden", true)
+	}
+}
+
 func main() {
 	doc := js.Global().Get("document")
 	u := &ui{
@@ -90,6 +110,8 @@ func main() {
 		visionBtn:  doc.Call("getElementById", "vision-btn"),
 		dpad:       doc.Call("getElementById", "dpad"),
 		hintEl:     doc.Call("getElementById", "controls-hint"),
+		wrapBtn:    doc.Call("getElementById", "play-wrap"),
+		wrapPill:   doc.Call("getElementById", "wrap-pill"),
 		lastTier:   -1,
 	}
 	u.ctx = u.canvas.Call("getContext", "2d")
@@ -118,6 +140,7 @@ func (u *ui) on(target js.Value, event string, fn func(js.Value)) {
 func (u *ui) bind() {
 	u.on(u.doc.Call("getElementById", "play-normal"), "click", func(js.Value) { u.start(modeNormal) })
 	u.on(u.doc.Call("getElementById", "play-demo"), "click", func(js.Value) { u.start(modeDemo) })
+	u.on(u.wrapBtn, "click", func(js.Value) { u.toggleWrap() })
 	u.on(u.doc.Call("getElementById", "menu-btn"), "click", func(js.Value) { u.openMenu() })
 	u.on(u.visionBtn, "click", func(js.Value) { u.toggleVision() })
 
@@ -137,6 +160,8 @@ func (u *ui) bind() {
 				u.start(modeNormal)
 			case "KeyD":
 				u.start(modeDemo)
+			case "KeyT":
+				u.toggleWrap()
 			}
 			return
 		}
@@ -156,22 +181,22 @@ func (u *ui) bind() {
 			u.openMenu()
 		case "KeyV":
 			u.toggleVision()
+		case "KeyT":
+			u.toggleWrap()
 		case "KeyP":
 			if !u.dead {
 				u.paused = !u.paused
 			}
 		}
 	})
-
-	stage := u.doc.Call("getElementById", "stage")
-	passive := map[string]any{"passive": true}
-
 	touchStart := js.FuncOf(func(_ js.Value, args []js.Value) any {
 		t := args[0].Get("touches").Index(0)
 		u.touchX, u.touchY = t.Get("clientX").Float(), t.Get("clientY").Float()
 		u.touchFired = false
 		return nil
 	})
+	stage := u.doc.Call("getElementById", "stage")
+	passive := map[string]any{"passive": true}
 	u.holds = append(u.holds, touchStart)
 	stage.Call("addEventListener", "touchstart", touchStart, passive)
 
@@ -260,6 +285,7 @@ func (u *ui) start(m mode) {
 	u.canvas.Get("style").Set("aspectRatio", fmt.Sprintf("%d / %d", cols, rows))
 
 	u.game = NewGame(cols, rows, time.Now().UnixNano()+rand.Int63())
+	u.game.SetWrap(u.wrap)
 	u.dead = false
 	u.paused = false
 	u.running = true
@@ -282,9 +308,15 @@ func (u *ui) start(m mode) {
 	u.visionBtn.Get("classList").Call("remove", "on")
 	u.dpad.Set("hidden", !(m == modeNormal && u.coarsePointer() && !u.portrait()))
 	if m == modeDemo {
-		u.hintEl.Set("innerHTML", "<kbd>V</kbd> AI vision &middot; <kbd>M</kbd> menu &middot; <kbd>P</kbd> pause")
+		u.hintEl.Set("innerHTML", "<kbd>V</kbd> AI vision &middot; <kbd>T</kbd> wrap &middot; <kbd>M</kbd> menu &middot; <kbd>P</kbd> pause")
 	} else {
-		u.hintEl.Set("innerHTML", "<kbd>&larr;&uarr;&darr;&rarr;</kbd> / <kbd>WASD</kbd> move &middot; <kbd>M</kbd> menu &middot; <kbd>P</kbd> pause &middot; swipe on mobile")
+		u.hintEl.Set("innerHTML", "<kbd>&larr;&uarr;&darr;&rarr;</kbd> / <kbd>WASD</kbd> move &middot; <kbd>T</kbd> wrap &middot; <kbd>M</kbd> menu &middot; <kbd>P</kbd> pause &middot; swipe on mobile")
+	}
+	if u.wrap {
+		u.wrapPill.Set("textContent", "WRAP")
+		u.wrapPill.Set("hidden", false)
+	} else {
+		u.wrapPill.Set("hidden", true)
 	}
 	u.showBest()
 }
