@@ -53,6 +53,7 @@ type ui struct {
 	visionBtn, dpad, hintEl       js.Value
 	wrapBtn, wrapPill             js.Value
 	obsBtn, obsPill               js.Value
+	lbBtn, lbPanel, lbRows        js.Value
 
 	game *Game
 	mode mode
@@ -147,12 +148,17 @@ func main() {
 		wrapPill:   doc.Call("getElementById", "wrap-pill"),
 		obsBtn:     doc.Call("getElementById", "play-obstacles"),
 		obsPill:    doc.Call("getElementById", "obstacles-pill"),
-		lastTier:   -1,
+		lbBtn:      doc.Call("getElementById", "play-leaderboard"),
+		lbPanel:    doc.Call("getElementById", "leaderboard"),
+		lbRows:     doc.Call("getElementById", "leaderboard-rows"),
 	}
 	u.ctx = u.canvas.Call("getContext", "2d")
 	u.best = u.loadBest()
 	u.showBest()
 	u.loadBenchmark()
+	if js.Global().Get("location").Get("search").String() == "?openlb=1" {
+		u.showLeaderboard()
+	}
 	u.bind()
 	u.loop()
 
@@ -177,7 +183,7 @@ func (u *ui) bind() {
 	u.on(u.doc.Call("getElementById", "play-demo"), "click", func(js.Value) { u.start(modeDemo) })
 	u.on(u.wrapBtn, "click", func(js.Value) { u.toggleWrap() })
 	u.on(u.obsBtn, "click", func(js.Value) { u.toggleObstacles() })
-	u.on(u.doc.Call("getElementById", "menu-btn"), "click", func(js.Value) { u.openMenu() })
+	u.on(u.lbBtn, "click", func(js.Value) { u.showLeaderboard() })
 	u.on(u.visionBtn, "click", func(js.Value) { u.toggleVision() })
 
 	keys := map[string]Point{
@@ -200,10 +206,11 @@ func (u *ui) bind() {
 				u.toggleWrap()
 			case "KeyO":
 				u.toggleObstacles()
+			case "KeyL":
+				u.showLeaderboard()
 			}
 			return
 		}
-
 		if d, ok := keys[code]; ok && u.mode == modeNormal {
 			e.Call("preventDefault")
 			if !u.dead {
@@ -223,6 +230,14 @@ func (u *ui) bind() {
 			u.toggleWrap()
 		case "KeyO":
 			u.toggleObstacles()
+		case "KeyL":
+			u.showLeaderboard()
+		case "Escape":
+			if !u.lbPanel.Get("hidden").Bool() {
+				u.hideLeaderboard()
+			} else {
+				u.openMenu()
+			}
 		case "KeyP":
 			if !u.dead {
 				u.paused = !u.paused
@@ -293,6 +308,37 @@ func (u *ui) bind() {
 			}
 		})
 	}
+}
+
+// showLeaderboard opens the leaderboard overlay and renders the 68
+// NPC entries plus the live player best-score row. Cheap to call.
+func (u *ui) showLeaderboard() {
+	if u.lbPanel.IsUndefined() || u.lbPanel.IsNull() {
+		return
+	}
+	rows := lbGetLeaderboard()
+	doc := js.Global().Get("document")
+	frag := doc.Call("createDocumentFragment")
+	for _, r := range rows {
+		div := doc.Call("createElement", "div")
+		cls := "lb-row"
+		if r.IsPlayer {
+			cls += " lb-player"
+		}
+		div.Set("className", cls)
+		div.Set("textContent", FormatRow(r))
+		frag.Call("appendChild", div)
+	}
+	u.lbRows.Set("innerHTML", "")
+	u.lbRows.Call("appendChild", frag)
+	u.lbPanel.Set("hidden", false)
+}
+
+func (u *ui) hideLeaderboard() {
+	if u.lbPanel.IsUndefined() || u.lbPanel.IsNull() {
+		return
+	}
+	u.lbPanel.Set("hidden", true)
 }
 
 func (u *ui) portrait() bool {

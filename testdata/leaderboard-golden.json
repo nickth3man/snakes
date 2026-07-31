@@ -1,0 +1,640 @@
+{
+  "version": 1,
+  "seed": 1364015733,
+  "name_count": 68,
+  "score_max": 320,
+  "score_min": 8,
+  "curve_exponent": 0.55,
+  "jitter_amp": 7,
+  "name_display_max": 22,
+  "npc_scores": [
+    {
+      "rank": 1,
+      "score": 318
+    },
+    {
+      "rank": 2,
+      "score": 295
+    },
+    {
+      "rank": 3,
+      "score": 280
+    },
+    {
+      "rank": 4,
+      "score": 259
+    },
+    {
+      "rank": 5,
+      "score": 252
+    },
+    {
+      "rank": 6,
+      "score": 250
+    },
+    {
+      "rank": 7,
+      "score": 239
+    },
+    {
+      "rank": 8,
+      "score": 232
+    },
+    {
+      "rank": 9,
+      "score": 223
+    },
+    {
+      "rank": 10,
+      "score": 223
+    },
+    {
+      "rank": 11,
+      "score": 216
+    },
+    {
+      "rank": 12,
+      "score": 202
+    },
+    {
+      "rank": 13,
+      "score": 195
+    },
+    {
+      "rank": 14,
+      "score": 198
+    },
+    {
+      "rank": 15,
+      "score": 192
+    },
+    {
+      "rank": 16,
+      "score": 186
+    },
+    {
+      "rank": 17,
+      "score": 177
+    },
+    {
+      "rank": 18,
+      "score": 169
+    },
+    {
+      "rank": 19,
+      "score": 170
+    },
+    {
+      "rank": 20,
+      "score": 159
+    },
+    {
+      "rank": 21,
+      "score": 155
+    },
+    {
+      "rank": 22,
+      "score": 157
+    },
+    {
+      "rank": 23,
+      "score": 153
+    },
+    {
+      "rank": 24,
+      "score": 144
+    },
+    {
+      "rank": 25,
+      "score": 149
+    },
+    {
+      "rank": 26,
+      "score": 135
+    },
+    {
+      "rank": 27,
+      "score": 134
+    },
+    {
+      "rank": 28,
+      "score": 125
+    },
+    {
+      "rank": 29,
+      "score": 131
+    },
+    {
+      "rank": 30,
+      "score": 129
+    },
+    {
+      "rank": 31,
+      "score": 113
+    },
+    {
+      "rank": 32,
+      "score": 111
+    },
+    {
+      "rank": 33,
+      "score": 115
+    },
+    {
+      "rank": 34,
+      "score": 108
+    },
+    {
+      "rank": 35,
+      "score": 98
+    },
+    {
+      "rank": 36,
+      "score": 103
+    },
+    {
+      "rank": 37,
+      "score": 101
+    },
+    {
+      "rank": 38,
+      "score": 100
+    },
+    {
+      "rank": 39,
+      "score": 92
+    },
+    {
+      "rank": 40,
+      "score": 83
+    },
+    {
+      "rank": 41,
+      "score": 86
+    },
+    {
+      "rank": 42,
+      "score": 84
+    },
+    {
+      "rank": 43,
+      "score": 85
+    },
+    {
+      "rank": 44,
+      "score": 81
+    },
+    {
+      "rank": 45,
+      "score": 79
+    },
+    {
+      "rank": 46,
+      "score": 70
+    },
+    {
+      "rank": 47,
+      "score": 69
+    },
+    {
+      "rank": 48,
+      "score": 65
+    },
+    {
+      "rank": 49,
+      "score": 59
+    },
+    {
+      "rank": 50,
+      "score": 50
+    },
+    {
+      "rank": 51,
+      "score": 56
+    },
+    {
+      "rank": 52,
+      "score": 54
+    },
+    {
+      "rank": 53,
+      "score": 53
+    },
+    {
+      "rank": 54,
+      "score": 50
+    },
+    {
+      "rank": 55,
+      "score": 42
+    },
+    {
+      "rank": 56,
+      "score": 46
+    },
+    {
+      "rank": 57,
+      "score": 38
+    },
+    {
+      "rank": 58,
+      "score": 42
+    },
+    {
+      "rank": 59,
+      "score": 28
+    },
+    {
+      "rank": 60,
+      "score": 32
+    },
+    {
+      "rank": 61,
+      "score": 30
+    },
+    {
+      "rank": 62,
+      "score": 26
+    },
+    {
+      "rank": 63,
+      "score": 23
+    },
+    {
+      "rank": 64,
+      "score": 19
+    },
+    {
+      "rank": 65,
+      "score": 21
+    },
+    {
+      "rank": 66,
+      "score": 8
+    },
+    {
+      "rank": 67,
+      "score": 6
+    },
+    {
+      "rank": 68,
+      "score": 12
+    }
+  ],
+  "cases": {
+    "no_player": [
+      "   1. Zeus                     318",
+      "   2. Michael Jordan           295",
+      "   3. Walter White             280",
+      "   4. Charlie Bucket           259",
+      "   5. Denzel Washington        252",
+      "   6. Shaquille O'Neal         250",
+      "   7. Allen 'The Answer' Iv…   239",
+      "   8. Bruce Wayne              232",
+      "   9. Blade                    223",
+      "  10. Apollo Creed             223",
+      "  11. Kobe Bryant              216",
+      "  12. L Lawliet                202",
+      "  13. Gene Wilder              198",
+      "  14. Bruce Lee                195",
+      "  15. Samuel L. Jackson        192",
+      "  16. Hakeem Olajuwon          186",
+      "  17. Earvin 'Magic' Johnson   177",
+      "  18. Morpheus                 170",
+      "  19. Peter Parker             169",
+      "  20. Muhammad Ali             159",
+      "  21. Lelouch Lamperouge       157",
+      "  22. Kevin Durant             155",
+      "  23. James Bond               153",
+      "  24. Wilt Chamberlain         149",
+      "  25. Giancarlo Esposito       144",
+      "  26. Julius 'Dr. J' Erving    135",
+      "  27. T'Challa                 134",
+      "  28. Nicolas Cage             131",
+      "  29. Lucifer Morningstar      129",
+      "  30. John Wick                125",
+      "  31. Light Yagami             115",
+      "  32. God                      113",
+      "  33. LeBron James             111",
+      "  34. Willy Wonka              108",
+      "  35. Kareem A. Jabbar         103",
+      "  36. Pete 'Pistol' Maravich   101",
+      "  37. Tony Stark               100",
+      "  38. Don Cheadle               98",
+      "  39. Wesley Snipes             92",
+      "  40. Kawhi Leonard             86",
+      "  41. Maximus Decimus Merid…    85",
+      "  42. Gus Fring                 84",
+      "  43. Odin                      83",
+      "  44. Idris Elba                81",
+      "  45. Moses Malone              79",
+      "  46. Clyde 'The Glide' Dre…    70",
+      "  47. Clark Kent                69",
+      "  48. Alucard                   65",
+      "  49. Clubber Lang              59",
+      "  50. Johan Liebert             56",
+      "  51. Ip Man                    54",
+      "  52. Christopher Walken        53",
+      "  53. Tracy McGrady             50",
+      "  54. Mahershala Ali            50",
+      "  55. Dominique 'The Human …    46",
+      "  56. David Robinson            42",
+      "  57. Vincent Vega              42",
+      "  58. Erik Killmonger           38",
+      "  59. Hades                     32",
+      "  60. Damian Lillard            30",
+      "  61. Laurence Fishburne        28",
+      "  62. Spike Spiegel             26",
+      "  63. Thomas Shelby             23",
+      "  64. Georgep Gervin            21",
+      "  65. Keith David               19",
+      "  66. Frank Castle              12",
+      "  67. Paul 'The Truth' Pier…     8",
+      "  68. Miles Morales              6"
+    ],
+    "low_best": [
+      "   1. Zeus                     318",
+      "   2. Michael Jordan           295",
+      "   3. Walter White             280",
+      "   4. Charlie Bucket           259",
+      "   5. Denzel Washington        252",
+      "   6. Shaquille O'Neal         250",
+      "   7. Allen 'The Answer' Iv…   239",
+      "   8. Bruce Wayne              232",
+      "   9. Blade                    223",
+      "  10. Apollo Creed             223",
+      "  11. Kobe Bryant              216",
+      "  12. L Lawliet                202",
+      "  13. Gene Wilder              198",
+      "  14. Bruce Lee                195",
+      "  15. Samuel L. Jackson        192",
+      "  16. Hakeem Olajuwon          186",
+      "  17. Earvin 'Magic' Johnson   177",
+      "  18. Morpheus                 170",
+      "  19. Peter Parker             169",
+      "  20. Muhammad Ali             159",
+      "  21. Lelouch Lamperouge       157",
+      "  22. Kevin Durant             155",
+      "  23. James Bond               153",
+      "  24. Wilt Chamberlain         149",
+      "  25. Giancarlo Esposito       144",
+      "  26. Julius 'Dr. J' Erving    135",
+      "  27. T'Challa                 134",
+      "  28. Nicolas Cage             131",
+      "  29. Lucifer Morningstar      129",
+      "  30. John Wick                125",
+      "  31. Light Yagami             115",
+      "  32. God                      113",
+      "  33. LeBron James             111",
+      "  34. Willy Wonka              108",
+      "  35. Kareem A. Jabbar         103",
+      "  36. Pete 'Pistol' Maravich   101",
+      "  37. Tony Stark               100",
+      "  38. Don Cheadle               98",
+      "  39. Wesley Snipes             92",
+      "  40. Kawhi Leonard             86",
+      "  41. Maximus Decimus Merid…    85",
+      "  42. Gus Fring                 84",
+      "  43. Odin                      83",
+      "  44. Idris Elba                81",
+      "  45. Moses Malone              79",
+      "  46. Clyde 'The Glide' Dre…    70",
+      "  47. Clark Kent                69",
+      "  48. Alucard                   65",
+      "  49. Clubber Lang              59",
+      "  50. Johan Liebert             56",
+      "  51. Ip Man                    54",
+      "  52. Christopher Walken        53",
+      "▶ 53. YOU                       50 (YOU)",
+      "  54. Tracy McGrady             50",
+      "  55. Mahershala Ali            50",
+      "  56. Dominique 'The Human …    46",
+      "  57. David Robinson            42",
+      "  58. Vincent Vega              42",
+      "  59. Erik Killmonger           38",
+      "  60. Hades                     32",
+      "  61. Damian Lillard            30",
+      "  62. Laurence Fishburne        28",
+      "  63. Spike Spiegel             26",
+      "  64. Thomas Shelby             23",
+      "  65. Georgep Gervin            21",
+      "  66. Keith David               19",
+      "  67. Frank Castle              12",
+      "  68. Paul 'The Truth' Pier…     8",
+      "  69. Miles Morales              6"
+    ],
+    "mid_best": [
+      "   1. Zeus                     318",
+      "   2. Michael Jordan           295",
+      "   3. Walter White             280",
+      "   4. Charlie Bucket           259",
+      "   5. Denzel Washington        252",
+      "   6. Shaquille O'Neal         250",
+      "   7. Allen 'The Answer' Iv…   239",
+      "   8. Bruce Wayne              232",
+      "   9. Blade                    223",
+      "  10. Apollo Creed             223",
+      "  11. Kobe Bryant              216",
+      "  12. L Lawliet                202",
+      "  13. Gene Wilder              198",
+      "  14. Bruce Lee                195",
+      "  15. Samuel L. Jackson        192",
+      "  16. Hakeem Olajuwon          186",
+      "  17. Earvin 'Magic' Johnson   177",
+      "  18. Morpheus                 170",
+      "  19. Peter Parker             169",
+      "  20. Muhammad Ali             159",
+      "  21. Lelouch Lamperouge       157",
+      "▶ 22. YOU                      156 (YOU)",
+      "  23. Kevin Durant             155",
+      "  24. James Bond               153",
+      "  25. Wilt Chamberlain         149",
+      "  26. Giancarlo Esposito       144",
+      "  27. Julius 'Dr. J' Erving    135",
+      "  28. T'Challa                 134",
+      "  29. Nicolas Cage             131",
+      "  30. Lucifer Morningstar      129",
+      "  31. John Wick                125",
+      "  32. Light Yagami             115",
+      "  33. God                      113",
+      "  34. LeBron James             111",
+      "  35. Willy Wonka              108",
+      "  36. Kareem A. Jabbar         103",
+      "  37. Pete 'Pistol' Maravich   101",
+      "  38. Tony Stark               100",
+      "  39. Don Cheadle               98",
+      "  40. Wesley Snipes             92",
+      "  41. Kawhi Leonard             86",
+      "  42. Maximus Decimus Merid…    85",
+      "  43. Gus Fring                 84",
+      "  44. Odin                      83",
+      "  45. Idris Elba                81",
+      "  46. Moses Malone              79",
+      "  47. Clyde 'The Glide' Dre…    70",
+      "  48. Clark Kent                69",
+      "  49. Alucard                   65",
+      "  50. Clubber Lang              59",
+      "  51. Johan Liebert             56",
+      "  52. Ip Man                    54",
+      "  53. Christopher Walken        53",
+      "  54. Tracy McGrady             50",
+      "  55. Mahershala Ali            50",
+      "  56. Dominique 'The Human …    46",
+      "  57. David Robinson            42",
+      "  58. Vincent Vega              42",
+      "  59. Erik Killmonger           38",
+      "  60. Hades                     32",
+      "  61. Damian Lillard            30",
+      "  62. Laurence Fishburne        28",
+      "  63. Spike Spiegel             26",
+      "  64. Thomas Shelby             23",
+      "  65. Georgep Gervin            21",
+      "  66. Keith David               19",
+      "  67. Frank Castle              12",
+      "  68. Paul 'The Truth' Pier…     8",
+      "  69. Miles Morales              6"
+    ],
+    "top_best": [
+      "▶  1. YOU                      500 (YOU)",
+      "   2. Zeus                     318",
+      "   3. Michael Jordan           295",
+      "   4. Walter White             280",
+      "   5. Charlie Bucket           259",
+      "   6. Denzel Washington        252",
+      "   7. Shaquille O'Neal         250",
+      "   8. Allen 'The Answer' Iv…   239",
+      "   9. Bruce Wayne              232",
+      "  10. Blade                    223",
+      "  11. Apollo Creed             223",
+      "  12. Kobe Bryant              216",
+      "  13. L Lawliet                202",
+      "  14. Gene Wilder              198",
+      "  15. Bruce Lee                195",
+      "  16. Samuel L. Jackson        192",
+      "  17. Hakeem Olajuwon          186",
+      "  18. Earvin 'Magic' Johnson   177",
+      "  19. Morpheus                 170",
+      "  20. Peter Parker             169",
+      "  21. Muhammad Ali             159",
+      "  22. Lelouch Lamperouge       157",
+      "  23. Kevin Durant             155",
+      "  24. James Bond               153",
+      "  25. Wilt Chamberlain         149",
+      "  26. Giancarlo Esposito       144",
+      "  27. Julius 'Dr. J' Erving    135",
+      "  28. T'Challa                 134",
+      "  29. Nicolas Cage             131",
+      "  30. Lucifer Morningstar      129",
+      "  31. John Wick                125",
+      "  32. Light Yagami             115",
+      "  33. God                      113",
+      "  34. LeBron James             111",
+      "  35. Willy Wonka              108",
+      "  36. Kareem A. Jabbar         103",
+      "  37. Pete 'Pistol' Maravich   101",
+      "  38. Tony Stark               100",
+      "  39. Don Cheadle               98",
+      "  40. Wesley Snipes             92",
+      "  41. Kawhi Leonard             86",
+      "  42. Maximus Decimus Merid…    85",
+      "  43. Gus Fring                 84",
+      "  44. Odin                      83",
+      "  45. Idris Elba                81",
+      "  46. Moses Malone              79",
+      "  47. Clyde 'The Glide' Dre…    70",
+      "  48. Clark Kent                69",
+      "  49. Alucard                   65",
+      "  50. Clubber Lang              59",
+      "  51. Johan Liebert             56",
+      "  52. Ip Man                    54",
+      "  53. Christopher Walken        53",
+      "  54. Tracy McGrady             50",
+      "  55. Mahershala Ali            50",
+      "  56. Dominique 'The Human …    46",
+      "  57. David Robinson            42",
+      "  58. Vincent Vega              42",
+      "  59. Erik Killmonger           38",
+      "  60. Hades                     32",
+      "  61. Damian Lillard            30",
+      "  62. Laurence Fishburne        28",
+      "  63. Spike Spiegel             26",
+      "  64. Thomas Shelby             23",
+      "  65. Georgep Gervin            21",
+      "  66. Keith David               19",
+      "  67. Frank Castle              12",
+      "  68. Paul 'The Truth' Pier…     8",
+      "  69. Miles Morales              6"
+    ],
+    "tie_best": [
+      "   1. Zeus                     318",
+      "   2. Michael Jordan           295",
+      "   3. Walter White             280",
+      "   4. Charlie Bucket           259",
+      "   5. Denzel Washington        252",
+      "   6. Shaquille O'Neal         250",
+      "   7. Allen 'The Answer' Iv…   239",
+      "   8. Bruce Wayne              232",
+      "▶  9. YOU                      223 (YOU)",
+      "  10. Blade                    223",
+      "  11. Apollo Creed             223",
+      "  12. Kobe Bryant              216",
+      "  13. L Lawliet                202",
+      "  14. Gene Wilder              198",
+      "  15. Bruce Lee                195",
+      "  16. Samuel L. Jackson        192",
+      "  17. Hakeem Olajuwon          186",
+      "  18. Earvin 'Magic' Johnson   177",
+      "  19. Morpheus                 170",
+      "  20. Peter Parker             169",
+      "  21. Muhammad Ali             159",
+      "  22. Lelouch Lamperouge       157",
+      "  23. Kevin Durant             155",
+      "  24. James Bond               153",
+      "  25. Wilt Chamberlain         149",
+      "  26. Giancarlo Esposito       144",
+      "  27. Julius 'Dr. J' Erving    135",
+      "  28. T'Challa                 134",
+      "  29. Nicolas Cage             131",
+      "  30. Lucifer Morningstar      129",
+      "  31. John Wick                125",
+      "  32. Light Yagami             115",
+      "  33. God                      113",
+      "  34. LeBron James             111",
+      "  35. Willy Wonka              108",
+      "  36. Kareem A. Jabbar         103",
+      "  37. Pete 'Pistol' Maravich   101",
+      "  38. Tony Stark               100",
+      "  39. Don Cheadle               98",
+      "  40. Wesley Snipes             92",
+      "  41. Kawhi Leonard             86",
+      "  42. Maximus Decimus Merid…    85",
+      "  43. Gus Fring                 84",
+      "  44. Odin                      83",
+      "  45. Idris Elba                81",
+      "  46. Moses Malone              79",
+      "  47. Clyde 'The Glide' Dre…    70",
+      "  48. Clark Kent                69",
+      "  49. Alucard                   65",
+      "  50. Clubber Lang              59",
+      "  51. Johan Liebert             56",
+      "  52. Ip Man                    54",
+      "  53. Christopher Walken        53",
+      "  54. Tracy McGrady             50",
+      "  55. Mahershala Ali            50",
+      "  56. Dominique 'The Human …    46",
+      "  57. David Robinson            42",
+      "  58. Vincent Vega              42",
+      "  59. Erik Killmonger           38",
+      "  60. Hades                     32",
+      "  61. Damian Lillard            30",
+      "  62. Laurence Fishburne        28",
+      "  63. Spike Spiegel             26",
+      "  64. Thomas Shelby             23",
+      "  65. Georgep Gervin            21",
+      "  66. Keith David               19",
+      "  67. Frank Castle              12",
+      "  68. Paul 'The Truth' Pier…     8",
+      "  69. Miles Morales              6"
+    ]
+  }
+}

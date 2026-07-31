@@ -377,6 +377,53 @@
         color: #ff7675;
         border: 1px solid rgba(255, 118, 117, 0.55);
       }
+      .card.lb {
+        color: #74b9ff;
+        border: 1px solid rgba(116, 185, 255, 0.55);
+      }
+      #leaderboard {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(10, 14, 22, 0.78);
+        backdrop-filter: blur(6px);
+      }
+      #leaderboard[hidden] { display: none; }
+      #leaderboard .panel {
+        max-width: min(560px, 92vw);
+        max-height: 80vh;
+        overflow: auto;
+        background: #0e131c;
+        border: 1px solid rgba(116, 185, 255, 0.45);
+        border-radius: 12px;
+        padding: 18px 22px;
+        box-shadow: 0 16px 60px rgba(0, 0, 0, 0.5);
+      }
+      #leaderboard h2 {
+        margin: 0 0 12px;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 14px;
+        letter-spacing: 0.12em;
+        color: #74b9ff;
+      }
+      #leaderboard-rows {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 12px;
+        line-height: 1.55;
+        white-space: pre;
+      }
+      .lb-row { color: #c8d3e1; }
+      .lb-player { color: #55efc4; font-weight: 600; }
+      #leaderboard .foot {
+        margin-top: 14px;
+        font-size: 11px;
+        color: #6b7787;
+        display: flex;
+        justify-content: space-between;
+      }
       @media (prefers-reduced-motion: reduce) {
         .card, .pop, .shake, #gameover { animation: none; transition: none; }
       }
@@ -403,11 +450,15 @@
           <span class="label">WALLS</span>
           <span class="hint">Static obstacles (toggle)</span>
         </button>
+        <button class="card lb" id="play-leaderboard">
+          <span class="label">LEADERBOARD</span>
+          <span class="hint">68 NPC scores + your best</span>
+        </button>
       </div>
       <p class="best" id="menu-best">Best: &mdash;</p>
       <p class="ai-stats" id="menu-ai">Loading the Go runtime&hellip;</p>
       <div class="foot">
-        <span><kbd>N</kbd> normal &middot; <kbd>D</kbd> demo &middot; <kbd>T</kbd> wrap &middot; <kbd>O</kbd> walls</span>
+        <span><kbd>N</kbd> normal &middot; <kbd>D</kbd> demo &middot; <kbd>T</kbd> wrap &middot; <kbd>O</kbd> walls &middot; <kbd>L</kbd> leaderboard</span>
         <a href="../">&larr; all snakes</a>
       </div>
     </div>
@@ -438,6 +489,17 @@
         <button class="left" data-dir="3">&larr;</button>
         <button class="right" data-dir="1">&rarr;</button>
         <button class="down" data-dir="2">&darr;</button>
+      </div>
+    </div>
+
+    <div id="leaderboard" hidden>
+      <div class="panel">
+        <h2>LEADERBOARD</h2>
+        <div id="leaderboard-rows"></div>
+        <div class="foot">
+          <span>Press <kbd>Esc</kbd> or <kbd>L</kbd> to close</span>
+          <span>68 NPC + you</span>
+        </div>
       </div>
     </div>
 
