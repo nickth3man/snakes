@@ -32,6 +32,7 @@ type Game struct {
 	cols, rows int
 	snake      []Point // head first
 	occupied   []bool
+	obstacles  []bool // static walls placed at game start; do not move
 	food       *Point
 	dir        Point
 	queue      []Point // up to two pending player directions
@@ -43,14 +44,26 @@ type Game struct {
 }
 
 func NewGame(cols, rows int, seed int64) *Game {
+	return NewGameWithObstacles(cols, rows, seed, 0)
+}
+
+// NewGameWithObstacles creates a fresh game and, if n > 0, places n static
+// obstacles. The seed is shared between obstacle placement and food spawn
+// so the same seed reproduces the same board.
+func NewGameWithObstacles(cols, rows int, seed int64, n int) *Game {
 	g := &Game{cols: cols, rows: rows, rng: rand.New(rand.NewSource(seed))}
+	g.obstacles = make([]bool, cols*rows)
 	g.Start()
+	if n > 0 {
+		g.PlaceObstacles(n)
+	}
 	return g
 }
 
+func (g *Game) SetWrap(wrap bool) { g.wrap = wrap }
+
 // SetWrap toggles torus mode. Movement, BFS, flood fill, and the wall-adjacency
 // heuristic all read this flag. The board shape does not change.
-func (g *Game) SetWrap(wrap bool) { g.wrap = wrap }
 
 // Wrap reports whether torus mode is on. Exposed for the UI and for tests.
 func (g *Game) Wrap() bool { return g.wrap }
@@ -105,9 +118,83 @@ func (g *Game) inBounds(p Point) bool {
 
 func (g *Game) occupiedAt(p Point) bool { return g.occupied[g.index(p)] }
 
-// spawnFood picks uniformly among empty cells; a full board is a win.
+// obstacleAt is true for cells that hold a static wall. Obstacles are
+// parallel to occupied but are not cleared as the snake moves.
+func (g *Game) obstacleAt(p Point) bool { return g.obstacles[g.index(p)] }
+
+// blockedAt is the union of snake body and static obstacles. Both
+// movement (Step) and the AI (bfs / flood) consult this to keep
+// collision logic in one place.
+func (g *Game) blockedAt(p Point) bool {
+	return g.occupiedAt(p) || g.obstacleAt(p)
+}
+
+// PlaceObstacles fills up to n cells with static walls, never on the
+// snake, the food, the outer edge, or the head's first step. The
+// board is left unchanged if there is not enough room for n obstacles.
+func (g *Game) PlaceObstacles(n int) {
+	if n <= 0 {
+		return
+	}
+	// Reserve the cells the snake would die on immediately: the head
+	// and the four neighbours it can reach on the first tick.
+	reserved := make([]bool, g.cols*g.rows)
+	for _, p := range g.snake {
+		reserved[g.index(p)] = true
+	}
+	if g.food != nil {
+		reserved[g.index(*g.food)] = true
+	}
+	if head := g.snake[0]; len(g.snake) > 0 {
+		for _, d := range Dirs {
+			nb, ok := g.stepFrom(head, d)
+			if !ok {
+				continue
+			}
+			reserved[g.index(nb)] = true
+		}
+	}
+	// Walk the board, skipping reserved cells and the outer edge.
+	candidates := make([]int, 0, g.cols*g.rows)
+	for i := 0; i < g.cols*g.rows; i++ {
+		if reserved[i] {
+			continue
+		}
+		p := Point{i % g.cols, i / g.cols}
+		if p.X == 0 || p.Y == 0 || p.X == g.cols-1 || p.Y == g.rows-1 {
+			continue
+		}
+		candidates = append(candidates, i)
+	}
+	if len(candidates) == 0 {
+		return
+	}
+	// Fisher-Yates with the existing RNG so the same seed reproduces.
+	for i := len(candidates) - 1; i > 0; i-- {
+		j := g.rng.Intn(i + 1)
+		candidates[i], candidates[j] = candidates[j], candidates[i]
+	}
+	for i := 0; i < n && i < len(candidates); i++ {
+		g.obstacles[candidates[i]] = true
+	}
+}
+
+// ObstacleCount returns the number of static walls currently on the
+// board. Exposed for the HUD and for tests.
+func (g *Game) ObstacleCount() int {
+	n := 0
+	for _, b := range g.obstacles {
+		if b {
+			n++
+		}
+	}
+	return n
+}
+
+// spawnFood picks uniformly among cells that are neither snake body nor
+// static obstacle. A board that is full of snake plus obstacles is a win.
 func (g *Game) spawnFood() {
-	free := g.cols*g.rows - len(g.snake)
+	free := g.cols*g.rows - len(g.snake) - g.ObstacleCount()
 	if free <= 0 {
 		g.food = nil
 		g.alive = false
@@ -115,8 +202,8 @@ func (g *Game) spawnFood() {
 		return
 	}
 	nth := g.rng.Intn(free)
-	for i, taken := range g.occupied {
-		if taken {
+	for i := 0; i < len(g.occupied); i++ {
+		if g.occupied[i] || g.obstacles[i] {
 			continue
 		}
 		if nth == 0 {
@@ -165,6 +252,13 @@ func (g *Game) Step() (ate, died, won bool) {
 
 	next, ok := g.stepFrom(g.snake[0], g.dir)
 	if !ok {
+		g.alive = false
+		return false, true, false
+	}
+	// Static obstacles are a hard wall, checked before the body so an
+	// obstacle under the tail never gets a free pass from the tail
+	// vacating on the same tick.
+	if g.obstacleAt(next) {
 		g.alive = false
 		return false, true, false
 	}

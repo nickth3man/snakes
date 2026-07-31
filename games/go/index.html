@@ -352,9 +352,30 @@
         border-color: #ffeaa7;
         color: #ffeaa7;
       }
+      .card.walls {
+        border-color: rgba(255, 118, 117, 0.55);
+        color: #ff7675;
+        background: rgba(255, 118, 117, 0.08);
+      }
+      .card.walls:hover,
+      .card.walls:focus-visible {
+        background: rgba(255, 118, 117, 0.22);
+        border-color: #ff7675;
+        transform: scale(1.05);
+        outline: none;
+      }
+      .card.walls.on {
+        background: rgba(255, 118, 117, 0.28);
+        border-color: #fab1a0;
+        color: #fab1a0;
+      }
       .wrap-pill {
         color: #fdcb6e;
         border: 1px solid rgba(253, 203, 110, 0.55);
+      }
+      .obstacles-pill {
+        color: #ff7675;
+        border: 1px solid rgba(255, 118, 117, 0.55);
       }
       @media (prefers-reduced-motion: reduce) {
         .card, .pop, .shake, #gameover { animation: none; transition: none; }
@@ -377,11 +398,15 @@
           <span class="label">WRAP</span>
           <span class="hint">Torus walls (toggle)</span>
         </button>
+        <button class="card walls" id="play-obstacles" aria-pressed="false">
+          <span class="label">WALLS</span>
+          <span class="hint">Static obstacles (toggle)</span>
+        </button>
       </div>
       <p class="best" id="menu-best">Best: &mdash;</p>
       <p class="ai-stats" id="menu-ai">Loading the Go runtime&hellip;</p>
       <div class="foot">
-        <span><kbd>N</kbd> normal &middot; <kbd>D</kbd> demo &middot; <kbd>T</kbd> wrap</span>
+        <span><kbd>N</kbd> normal &middot; <kbd>D</kbd> demo &middot; <kbd>T</kbd> wrap &middot; <kbd>O</kbd> walls</span>
         <a href="../">&larr; all snakes</a>
       </div>
     </div>
@@ -392,8 +417,11 @@
         <span class="pill" id="score">Score: 0</span>
         <span class="pill" id="best">Best: &mdash;</span>
         <span class="pill wrap-pill" id="wrap-pill" hidden>WRAP</span>
+        <span class="pill obstacles-pill" id="obstacles-pill" hidden>WALLS</span>
         <button id="vision-btn" hidden>AI Vision: off</button>
       </div>
+
+      <div class="stage" id="stage">
         <canvas id="board"></canvas>
         <div id="gameover" hidden></div>
         <div id="tier-badge"></div>

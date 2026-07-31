@@ -52,12 +52,13 @@ type ui struct {
 	menuAIEl, gameOverEl, badgeEl js.Value
 	visionBtn, dpad, hintEl       js.Value
 	wrapBtn, wrapPill             js.Value
+	obsBtn, obsPill               js.Value
 
 	game *Game
 	mode mode
 
 	running, dead, paused bool
-	wrap                  bool
+	wrap, obstacles       bool
 	acc, last             float64
 	best                  int
 
@@ -94,6 +95,38 @@ func (u *ui) toggleWrap() {
 	}
 }
 
+// toggleObstacles flips the static-obstacles mode. The current round is
+// kept — the new layout is only applied on the next start().
+func (u *ui) toggleObstacles() {
+	u.obstacles = !u.obstacles
+	if u.obsPill.IsUndefined() || u.obsPill.IsNull() {
+		return
+	}
+	if u.obstacles {
+		u.obsPill.Set("textContent", "WALLS")
+		u.obsPill.Set("hidden", false)
+	} else {
+		u.obsPill.Set("hidden", true)
+	}
+}
+
+// obsCount is the per-round number of obstacles for the chosen board.
+// Scales with board area so the density stays roughly constant.
+func (u *ui) obsCount() int {
+	cols, rows := Cols, Rows
+	if u.portrait() {
+		cols, rows = ColsPortrait, RowsPortrait
+	}
+	n := (cols * rows) / 16
+	if n < 8 {
+		n = 8
+	}
+	if n > 60 {
+		n = 60
+	}
+	return n
+}
+
 func main() {
 	doc := js.Global().Get("document")
 	u := &ui{
@@ -112,6 +145,8 @@ func main() {
 		hintEl:     doc.Call("getElementById", "controls-hint"),
 		wrapBtn:    doc.Call("getElementById", "play-wrap"),
 		wrapPill:   doc.Call("getElementById", "wrap-pill"),
+		obsBtn:     doc.Call("getElementById", "play-obstacles"),
+		obsPill:    doc.Call("getElementById", "obstacles-pill"),
 		lastTier:   -1,
 	}
 	u.ctx = u.canvas.Call("getContext", "2d")
@@ -141,6 +176,7 @@ func (u *ui) bind() {
 	u.on(u.doc.Call("getElementById", "play-normal"), "click", func(js.Value) { u.start(modeNormal) })
 	u.on(u.doc.Call("getElementById", "play-demo"), "click", func(js.Value) { u.start(modeDemo) })
 	u.on(u.wrapBtn, "click", func(js.Value) { u.toggleWrap() })
+	u.on(u.obsBtn, "click", func(js.Value) { u.toggleObstacles() })
 	u.on(u.doc.Call("getElementById", "menu-btn"), "click", func(js.Value) { u.openMenu() })
 	u.on(u.visionBtn, "click", func(js.Value) { u.toggleVision() })
 
@@ -162,6 +198,8 @@ func (u *ui) bind() {
 				u.start(modeDemo)
 			case "KeyT":
 				u.toggleWrap()
+			case "KeyO":
+				u.toggleObstacles()
 			}
 			return
 		}
@@ -183,6 +221,8 @@ func (u *ui) bind() {
 			u.toggleVision()
 		case "KeyT":
 			u.toggleWrap()
+		case "KeyO":
+			u.toggleObstacles()
 		case "KeyP":
 			if !u.dead {
 				u.paused = !u.paused
@@ -284,7 +324,11 @@ func (u *ui) start(m mode) {
 	u.canvas.Set("height", rows*cellPx)
 	u.canvas.Get("style").Set("aspectRatio", fmt.Sprintf("%d / %d", cols, rows))
 
-	u.game = NewGame(cols, rows, time.Now().UnixNano()+rand.Int63())
+	obs := 0
+	if u.obstacles {
+		obs = u.obsCount()
+	}
+	u.game = NewGameWithObstacles(cols, rows, time.Now().UnixNano()+rand.Int63(), obs)
 	u.game.SetWrap(u.wrap)
 	u.dead = false
 	u.paused = false
@@ -308,9 +352,9 @@ func (u *ui) start(m mode) {
 	u.visionBtn.Get("classList").Call("remove", "on")
 	u.dpad.Set("hidden", !(m == modeNormal && u.coarsePointer() && !u.portrait()))
 	if m == modeDemo {
-		u.hintEl.Set("innerHTML", "<kbd>V</kbd> AI vision &middot; <kbd>T</kbd> wrap &middot; <kbd>M</kbd> menu &middot; <kbd>P</kbd> pause")
+		u.hintEl.Set("innerHTML", "<kbd>V</kbd> AI vision &middot; <kbd>T</kbd> wrap &middot; <kbd>O</kbd> walls &middot; <kbd>M</kbd> menu &middot; <kbd>P</kbd> pause")
 	} else {
-		u.hintEl.Set("innerHTML", "<kbd>&larr;&uarr;&darr;&rarr;</kbd> / <kbd>WASD</kbd> move &middot; <kbd>T</kbd> wrap &middot; <kbd>M</kbd> menu &middot; <kbd>P</kbd> pause &middot; swipe on mobile")
+		u.hintEl.Set("innerHTML", "<kbd>&larr;&uarr;&darr;&rarr;</kbd> / <kbd>WASD</kbd> move &middot; <kbd>T</kbd> wrap &middot; <kbd>O</kbd> walls &middot; <kbd>M</kbd> menu &middot; <kbd>P</kbd> pause &middot; swipe on mobile")
 	}
 	if u.wrap {
 		u.wrapPill.Set("textContent", "WRAP")
@@ -318,7 +362,12 @@ func (u *ui) start(m mode) {
 	} else {
 		u.wrapPill.Set("hidden", true)
 	}
-	u.showBest()
+	if u.obstacles {
+		u.obsPill.Set("textContent", fmt.Sprintf("WALLS %d", u.game.ObstacleCount()))
+		u.obsPill.Set("hidden", false)
+	} else {
+		u.obsPill.Set("hidden", true)
+	}
 }
 
 func (u *ui) restartIfDead() {

@@ -316,3 +316,211 @@ func TestWrapDecideStillPicksLegalMove(t *testing.T) {
 		t.Fatalf("AI chose reversal %v against dir %v", d.Dir, g.dir)
 	}
 }
+
+// resetSnake installs a fresh three-cell horizontal snake on row mid, facing
+// right, and rebuilds occupied. Used by the obstacle tests.
+func resetSnake(g *Game) {
+	mid := g.rows / 2
+	safe := g.cols / 2
+	if safe > 5 {
+		safe = 5
+	}
+	if safe < 2 {
+		safe = 2
+	}
+	g.snake = []Point{{safe, mid}, {safe - 1, mid}, {safe - 2, mid}}
+	g.dir = Right
+	g.queue = g.queue[:0]
+	g.alive = true
+	for i := range g.occupied {
+		g.occupied[i] = false
+	}
+	for _, p := range g.snake {
+		g.occupied[g.index(p)] = true
+	}
+}
+
+// TestObstaclePlacementAvoidsSnakeAndEdges: a seeded game with N obstacles
+// places at most N of them, none on the snake or the outer edge.
+func TestObstaclePlacementAvoidsSnakeAndEdges(t *testing.T) {
+	for _, n := range []int{0, 1, 5, 20} {
+		g := NewGameWithObstacles(12, 10, 1, n)
+		if g.ObstacleCount() > n {
+			t.Fatalf("asked for %d obstacles, placed %d", n, g.ObstacleCount())
+		}
+		for i, b := range g.obstacles {
+			if !b {
+				continue
+			}
+			p := Point{i % g.cols, i / g.cols}
+			if p.X == 0 || p.Y == 0 || p.X == g.cols-1 || p.Y == g.rows-1 {
+				t.Fatalf("obstacle on edge: %v", p)
+			}
+			for _, s := range g.snake {
+				if s == p {
+					t.Fatalf("obstacle on snake: %v", p)
+				}
+			}
+		}
+	}
+}
+
+// TestObstaclePlacementAvoidsHeadNeighborhood: a fresh obstacle must not
+// land on any of the head's first-tick neighbours. Otherwise the player is
+// born dead.
+func TestObstaclePlacementAvoidsHeadNeighborhood(t *testing.T) {
+	for _, seed := range []int64{1, 7, 42, 99, 1234} {
+		g := NewGameWithObstacles(12, 10, seed, 30)
+		head := g.snake[0]
+		for _, d := range Dirs {
+			nb := Point{head.X + d.X, head.Y + d.Y}
+			if nb.X < 0 || nb.Y < 0 || nb.X >= g.cols || nb.Y >= g.rows {
+				continue
+			}
+			if g.obstacles[g.index(nb)] {
+				t.Fatalf("seed %d: obstacle at head neighbour %v", seed, nb)
+			}
+		}
+	}
+}
+
+// TestObstaclePlacementHonoursCount: on a roomy board the requested count
+// is honoured exactly.
+func TestObstaclePlacementHonoursCount(t *testing.T) {
+	g := NewGameWithObstacles(20, 20, 1, 50)
+	if g.ObstacleCount() != 50 {
+		t.Fatalf("placed %d obstacles, want 50", g.ObstacleCount())
+	}
+}
+
+// TestObstacleStepIsFatal: stepping the head onto an obstacle is a death,
+// same as a wall.
+func TestObstacleStepIsFatal(t *testing.T) {
+	g := NewGameWithObstacles(10, 10, 1, 0)
+	resetSnake(g)
+	g.obstacles[g.index(Point{g.snake[0].X + 1, g.snake[0].Y})] = true
+	if _, died, _ := g.Step(); !died {
+		t.Fatal("obstacle step should be fatal")
+	}
+}
+
+// TestObstacleBFSBlocked: with the only food sealed in by walls, BFS
+// returns nil and the AI cannot plan a Tier-1 path.
+func TestObstacleBFSBlocked(t *testing.T) {
+	g := NewGameWithObstacles(8, 8, 1, 0)
+	resetSnake(g)
+	start := g.snake[0]
+	goal := Point{start.X + 3, start.Y}
+	// Block the two cells between start and goal on the same row.
+	for x := start.X + 1; x < goal.X; x++ {
+		g.obstacles[g.index(Point{x, start.Y})] = true
+	}
+	// And seal the goal cell on top, bottom, and the far side.
+	g.obstacles[g.index(Point{goal.X, goal.Y - 1})] = true
+	g.obstacles[g.index(Point{goal.X, goal.Y + 1})] = true
+	g.obstacles[g.index(Point{goal.X + 1, goal.Y})] = true
+	blocked := make([]bool, g.cols*g.rows)
+	for i, b := range g.obstacles {
+		blocked[i] = b
+	}
+	if g.bfs(start, goal, blocked) != nil {
+		t.Fatal("BFS should not reach the sealed goal")
+	}
+}
+
+// TestObstacleFloodIsSmaller: a board with N obstacles has a strictly
+// smaller flood fill than the same board without them.
+func TestObstacleFloodIsSmaller(t *testing.T) {
+	open := NewGameWithObstacles(8, 8, 1, 0)
+	closed := NewGameWithObstacles(8, 8, 1, 8)
+	resetSnake(closed)
+	blocked := make([]bool, closed.cols*closed.rows)
+	for i, b := range closed.obstacles {
+		blocked[i] = b
+	}
+	plain := open.flood(open.snake[0], make([]bool, open.cols*open.rows))
+	wall := closed.flood(closed.snake[0], blocked)
+	if len(wall) >= len(plain) {
+		t.Fatalf("obstacles did not shrink flood: plain=%d wall=%d", len(plain), len(wall))
+	}
+}
+
+// TestObstacleDecideAvoids: with an obstacle immediately in front, the AI
+// must not choose the blocked direction.
+func TestObstacleDecideAvoids(t *testing.T) {
+	g := NewGameWithObstacles(8, 8, 1, 0)
+	resetSnake(g)
+	inFront := Point{g.snake[0].X + 1, g.snake[0].Y}
+	g.obstacles[g.index(inFront)] = true
+	d := Decide(g)
+	if d.Dir == Right {
+		t.Fatalf("AI chose Right into an obstacle at %v", inFront)
+	}
+}
+
+// TestObstaclesDeterministic: same seed yields the same obstacle layout.
+func TestObstaclesDeterministic(t *testing.T) {
+	a := NewGameWithObstacles(12, 10, 42, 10)
+	b := NewGameWithObstacles(12, 10, 42, 10)
+	for i := range a.obstacles {
+		if a.obstacles[i] != b.obstacles[i] {
+			t.Fatalf("seed 42 produced different layouts at %d", i)
+		}
+	}
+}
+
+// TestObstacleFullBoardWins: when the snake plus the obstacles fill the
+// board, spawnFood must declare won=true and food=nil.
+func TestObstacleFullBoardWins(t *testing.T) {
+	g := NewGameWithObstacles(5, 5, 1, 1)
+	resetSnake(g)
+	// Mark every non-obstacle cell as snake body. The only remaining
+	// free cell is whatever occupiedAt returns false for. Pick it
+	// to host the head, then make it the only non-obstacle cell.
+	for i := range g.occupied {
+		g.occupied[i] = false
+	}
+	// Fill snake on every non-obstacle cell.
+	for i := 0; i < g.cols*g.rows; i++ {
+		if g.obstacles[i] {
+			continue
+		}
+		g.occupied[i] = true
+	}
+	// Reserve one non-obstacle cell for the head and the food.
+	freeCell := -1
+	for i := 0; i < g.cols*g.rows; i++ {
+		if g.obstacles[i] {
+			continue
+		}
+		freeCell = i
+		break
+	}
+	g.occupied[freeCell] = false
+	// Park the snake head on the free cell.
+	p := Point{freeCell % g.cols, freeCell / g.cols}
+	g.snake = []Point{p}
+	// Now spawnFood sees free = 25 - 1 - 1 = 23, so the standard call
+	// will succeed. The win path is: the food lands on the only cell,
+	// the snake eats it, then spawnFood with len(snake)=2 and ObstacleCount=1
+	// still finds 22 free cells. To trigger the win we make the snake
+	// fill the only free cell by setting snake to length 24, then call
+	// spawnFood which sees free = 0.
+	// Simulate that: mark every non-obstacle cell as snake body, then
+	// set snake to occupy all of them.
+	for i := 0; i < g.cols*g.rows; i++ {
+		if g.obstacles[i] {
+			continue
+		}
+		g.occupied[i] = true
+		g.snake = append(g.snake, Point{i % g.cols, i / g.cols})
+	}
+	// Now spawnFood should declare a win.
+	g.spawnFood()
+	if g.food != nil {
+		t.Fatalf("expected food=nil on full obstacle board, got %v", *g.food)
+	}
+	if !g.won {
+		t.Fatal("expected won=true on full obstacle board")
+	}
+}

@@ -51,9 +51,16 @@ func Decide(g *Game) Decision {
 	}
 
 	// After one step the tail moves on, so it is not an obstacle for lookahead.
+	// Static obstacles are always fatal, so they stay blocked regardless of
+	// where the tail happens to be.
 	blocked := make([]bool, g.cols*g.rows)
 	for i := 0; i < len(g.snake)-1; i++ {
 		blocked[g.index(g.snake[i])] = true
+	}
+	for i, b := range g.obstacles {
+		if b {
+			blocked[i] = true
+		}
 	}
 
 	if len(moves) == 0 {
